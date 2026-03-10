@@ -137,3 +137,10 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Stream Deck plugin build output
+com.maxik.steam-achievements.sdPlugin/bin/
+com.maxik.steam-achievements.sdPlugin/logs/
+
+# package-lock (uncomment if you want to commit it)
+# package-lock.json

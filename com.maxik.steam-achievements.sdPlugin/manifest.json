@@ -1,0 +1,95 @@
+{
+	"Name": "Steam Achievement Hunter",
+	"Version": "0.1.0.0",
+	"Author": "Maxik",
+	"Description": "Track Steam achievements in real-time on your Stream Deck. Auto-detect running games, monitor unlock progress, and view global stats.",
+	"Category": "Steam Achievement Hunter",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 2,
+	"Software": {
+		"MinimumVersion": "6.5"
+	},
+	"OS": [
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "enabled"
+	},
+	"UUID": "com.maxik.steam-achievements",
+	"Actions": [
+		{
+			"Name": "Dashboard: Steam Level",
+			"UUID": "com.maxik.steam-achievements.dashboard-level",
+			"Icon": "imgs/actions/dashboard/icon",
+			"Tooltip": "Displays your current Steam level.",
+			"PropertyInspectorPath": "ui/dashboard.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/dashboard/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 12
+				}
+			]
+		},
+		{
+			"Name": "Dashboard: Total Achievements",
+			"UUID": "com.maxik.steam-achievements.dashboard-total",
+			"Icon": "imgs/actions/dashboard/icon",
+			"Tooltip": "Displays your total number of unlocked achievements across all games.",
+			"PropertyInspectorPath": "ui/dashboard.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/dashboard/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 12
+				}
+			]
+		},
+		{
+			"Name": "Dashboard: Perfect Games",
+			"UUID": "com.maxik.steam-achievements.dashboard-perfect",
+			"Icon": "imgs/actions/dashboard/icon",
+			"Tooltip": "Displays the number of games where you unlocked 100% of achievements.",
+			"PropertyInspectorPath": "ui/dashboard.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/dashboard/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 12
+				}
+			]
+		},
+		{
+			"Name": "Achievement Radar",
+			"UUID": "com.maxik.steam-achievements.achievement-radar",
+			"Icon": "imgs/actions/radar/icon",
+			"Tooltip": "Detects the currently running Steam game and displays the next locked achievement with its icon and progress.",
+			"PropertyInspectorPath": "ui/radar.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/radar/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 9
+				}
+			]
+		}
+	]
+}

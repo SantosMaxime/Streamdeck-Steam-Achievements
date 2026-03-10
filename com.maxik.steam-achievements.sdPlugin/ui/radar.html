@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Achievement Radar - Settings</title>
+	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
+	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
+</head>
+<body>
+	<!-- ── Global settings (shared with all actions) ────────────── -->
+
+	<sdpi-item label="Steam API Key">
+		<sdpi-textfield
+			setting="apiKey"
+			global
+			type="password"
+			placeholder="Enter your Steam Web API key"
+			required
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Get your key">
+		<sdpi-link url="https://steamcommunity.com/dev/apikey">steamcommunity.com/dev/apikey</sdpi-link>
+	</sdpi-item>
+
+	<sdpi-item label="Steam ID (64-bit)">
+		<sdpi-textfield
+			setting="steamId"
+			global
+			placeholder="e.g. 76561198012345678"
+			required
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Find your ID">
+		<sdpi-link url="https://steamid.io/">steamid.io</sdpi-link>
+	</sdpi-item>
+
+	<!-- ── Radar-specific settings (per action instance) ────────── -->
+
+	<hr style="border-color: #3a3a3a; margin: 12px 0;" />
+
+	<sdpi-item label="Refresh (seconds)">
+		<sdpi-textfield
+			setting="refreshInterval"
+			type="number"
+			placeholder="60"
+			min="10"
+			max="600"
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Click action">
+		<sdpi-select setting="clickAction">
+			<option value="youtube">Open YouTube Guide</option>
+			<option value="steam">Open Steam Guides</option>
+		</sdpi-select>
+	</sdpi-item>
+
+	<details>
+		<summary style="color: #969696; cursor: pointer; padding: 8px 0; font-size: 12px;">
+			How to use
+		</summary>
+		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
+			<p><strong>1.</strong> Fill in your Steam API key and 64-bit Steam ID above (shared with all actions).</p>
+			<p><strong>2.</strong> Set the polling interval (how often the radar checks for updates).</p>
+			<p><strong>3.</strong> Choose what happens when you press the key: open a YouTube or Steam community guide for the displayed achievement.</p>
+			<p><strong>4.</strong> When an achievement is unlocked, a 10-second celebration animation plays automatically.</p>
+		</div>
+	</details>
+</body>
+</html>
