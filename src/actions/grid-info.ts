@@ -1,8 +1,8 @@
 /**
- * Grid Info — displays a circular progress ring and game stats.
+ * Grid Info — displays progress stats or games-mode info.
  *
- * Shows: game name + "23/50 (46%)" with an SVG progress ring.
- * Updates when global settings change (gridVersion).
+ * Achievements mode: shows the progress ring + game name + unlocked/total count.
+ * Games mode:        shows how many games are loaded; press to go back to achievements.
  */
 
 import streamDeck, {
@@ -12,7 +12,7 @@ import streamDeck, {
 	WillAppearEvent,
 	WillDisappearEvent,
 } from "@elgato/streamdeck";
-import { getGridController, type SortMode } from "../services/grid-controller";
+import { getGridController } from "../services/grid-controller";
 import { renderProgressRing } from "../services/svg-renderer";
 
 @action({ UUID: "com.maxik.steam-achievements.grid-info" })
@@ -35,19 +35,27 @@ export class GridInfo extends SingletonAction {
 		this.disposable = undefined;
 	}
 
-	/** Press cycles through sort modes: default → rarest → alpha → locked-only → unlocked-only → default */
+	/** In games mode: press to go back to achievements. In achievements mode: no action. */
 	override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
 		const grid = getGridController();
-		const modes: SortMode[] = ["default", "rarest", "alpha", "locked-only", "unlocked-only"];
-		const currentIdx = modes.indexOf(grid.getSortMode());
-		const nextMode = modes[(currentIdx + 1) % modes.length];
-		await grid.setSortMode(nextMode);
+		if (grid.getMode() === "games") {
+			await grid.restoreAchievements();
+		}
 	}
 
 	private async render(actionObj: { setImage: (img?: string) => Promise<void>; setTitle: (t: string) => Promise<void> }): Promise<void> {
 		const grid = getGridController();
-		const gameName = grid.getGameName();
 
+		if (grid.getMode() === "games") {
+			const count = grid.getGamesCount();
+			const page = grid.getPage() + 1;
+			const pageCount = grid.getPageCount();
+			await actionObj.setTitle(`${count} games\nPage ${page}/${pageCount}\n← Back`);
+			await actionObj.setImage(renderProgressRing(0));
+			return;
+		}
+
+		const gameName = grid.getGameName();
 		if (!gameName) {
 			await actionObj.setTitle("No game\nloaded");
 			await actionObj.setImage(renderProgressRing(0));
@@ -55,10 +63,8 @@ export class GridInfo extends SingletonAction {
 		}
 
 		const { unlocked, total, pct } = grid.getStats();
-		const sortLabel = grid.getSortMode() === "default" ? "" : `\n[${grid.getSortMode()}]`;
-
 		const name = gameName.length > 16 ? gameName.slice(0, 14) + "…" : gameName;
-		await actionObj.setTitle(`${name}\n${unlocked}/${total} (${pct}%)${sortLabel}`);
+		await actionObj.setTitle(`${name}\n${unlocked}/${total} (${pct}%)`);
 		await actionObj.setImage(renderProgressRing(pct));
 	}
 }

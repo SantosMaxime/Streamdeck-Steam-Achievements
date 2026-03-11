@@ -238,9 +238,19 @@ export function renderProfileLauncherKey(label: string): string {
 
 /**
  * Game tile — shown when the grid is in "games" mode.
- * Splits the game name across two lines and shows a teal border.
+ * Shows the Steam header image when available, or splits the game name across
+ * two lines with a teal border as a fallback.
  */
-export function renderGameCell(name: string): string {
+export function renderGameCell(name: string, imageDataUri: string | null = null): string {
+	if (imageDataUri) {
+		const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
+  <image href="${imageDataUri}" x="0" y="0" width="${SIZE}" height="${SIZE}" preserveAspectRatio="xMidYMid slice"/>
+  <rect x="0" y="${SIZE - 22}" width="${SIZE}" height="22" fill="rgba(0,0,0,0.65)"/>
+  <text x="${SIZE / 2}" y="${SIZE - 7}" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#0d9488">CLICK TO LOAD</text>
+</svg>`;
+		return svgToDataUri(svg);
+	}
+
 	let l1 = name, l2 = "";
 	if (name.length > 13) {
 		const mid = Math.floor(name.length / 2);

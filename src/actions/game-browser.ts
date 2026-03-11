@@ -65,6 +65,8 @@ export class GameBrowser extends SingletonAction<GameBrowserSettings> {
 
 		if (type === "requestGames") {
 			await this.sendGamesToPI();
+		} else if (type === "browseGames") {
+			await this.browseGamesOnGrid(ev.action.device);
 		} else if (type === "loadGame") {
 			const appId = typeof msg["appId"] === "number" ? (msg["appId"] as number) : null;
 			if (appId) {

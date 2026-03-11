@@ -129,7 +129,7 @@
 			]
 		},
 		{
-			"Name": "Grid: Achievement Cell",
+			"Name": "Grid: Cell",
 			"UUID": "com.maxik.steam-achievements.grid-cell",
 			"Icon": "imgs/actions/grid-cell/icon",
 			"Tooltip": "Displays a single achievement from the grid. Place multiple cells to create a gallery view.",
@@ -197,7 +197,7 @@
 			]
 		},
 		{
-			"Name": "Grid: Info & Sort",
+			"Name": "Grid: Info",
 			"UUID": "com.maxik.steam-achievements.grid-info",
 			"Icon": "imgs/actions/grid-info/icon",
 			"Tooltip": "Shows game progress ring. Press to cycle sort mode (default, rarest, alphabetical, locked only, unlocked only).",
@@ -214,7 +214,7 @@
 			]
 		},
 		{
-			"Name": "Game Browser",
+			"Name": "Load Game",
 			"UUID": "com.maxik.steam-achievements.game-browser",
 			"Icon": "imgs/actions/game-browser/icon",
 			"Tooltip": "Select a game from your library to load into the achievement grid.",

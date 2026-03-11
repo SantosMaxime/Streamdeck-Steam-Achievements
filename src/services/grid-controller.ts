@@ -148,6 +148,15 @@ class GridController {
 	// ── Shared getters ───────────────────────────────────────
 
 	getMode(): GridMode { return this.mode; }
+	getGamesCount(): number { return this.games.length; }
+
+	/** Switch back to achievements mode without re-fetching (games mode → achievements mode). */
+	async restoreAchievements(): Promise<void> {
+		if (this.achievements.length === 0) { await this.clear(); return; }
+		this.mode = "achievements";
+		this.page = 0;
+		await this.broadcast();
+	}
 
 	/** Get the achievement for a given slot index on the current page (achievements mode). */
 	getSlot(slotIndex: number): GridAchievement | null {

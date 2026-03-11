@@ -2,11 +2,32 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>Game Browser - Settings</title>
+	<title>Load Game - Settings</title>
 	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
 	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
 	<style>
-		.picker-wrap { padding: 4px 14px 8px; }
+		.section { padding: 4px 14px 8px; }
+		.section-label {
+			font-size: 11px;
+			color: #969696;
+			margin-bottom: 4px;
+		}
+		.btn {
+			width: 100%;
+			box-sizing: border-box;
+			background: #2d2d2d;
+			border: 1px solid #3a3a3a;
+			color: #c8c8c8;
+			padding: 6px 10px;
+			border-radius: 3px;
+			font-size: 12px;
+			cursor: pointer;
+			margin-bottom: 6px;
+		}
+		.btn:hover { background: #3d3d3d; }
+		.btn:disabled { opacity: 0.5; cursor: default; }
+		.btn-primary { border-color: #0d9488; color: #5eead4; }
+		.btn-primary:hover { background: #1a2e2b; }
 		#game-search {
 			width: 100%;
 			box-sizing: border-box;
@@ -20,7 +41,7 @@
 		}
 		#game-search:focus { outline: none; border-color: #5a5a5a; }
 		#game-list-wrap {
-			height: 140px;
+			height: 120px;
 			overflow-y: auto;
 			background: #1e1e1e;
 			border: 1px solid #3a3a3a;
@@ -44,37 +65,18 @@
 			color: #969696;
 			padding: 4px 8px;
 		}
-		#load-games-btn {
-			background: #2d2d2d;
-			border: 1px solid #3a3a3a;
-			color: #c8c8c8;
-			padding: 4px 10px;
-			border-radius: 3px;
-			font-size: 11px;
-			cursor: pointer;
-			margin-bottom: 6px;
-		}
-		#load-games-btn:hover { background: #3d3d3d; }
-		#load-games-btn:disabled { opacity: 0.5; cursor: default; }
-		.picker-label {
-			font-size: 11px;
-			color: #969696;
-			margin-bottom: 4px;
-		}
 	</style>
 </head>
 <body>
-	<!-- ── Game picker (plain DOM — not inside sdpi-item) ────────── -->
-	<div class="picker-wrap">
-		<div class="picker-label">Pick a game</div>
-		<button id="load-games-btn">Load my games</button>
-		<input id="game-search" type="text" placeholder="Search…" style="display:none;" />
-		<div id="game-list-wrap" style="display:none;">
-			<div id="game-status">Press "Load my games" to fetch your library.</div>
-		</div>
+	<!-- ── Browse library on grid ─────────────────────────────── -->
+	<div class="section">
+		<div class="section-label">Browse games</div>
+		<button id="browse-grid-btn" class="btn btn-primary">Browse library on grid</button>
 	</div>
 
-	<!-- ── Game App ID (manual override) ─────────────────────────── -->
+	<hr style="border-color: #3a3a3a; margin: 4px 0;" />
+
+	<!-- ── Pin a specific game ────────────────────────────────── -->
 	<sdpi-item label="Game App ID">
 		<sdpi-textfield
 			setting="appId"
@@ -85,19 +87,28 @@
 		></sdpi-textfield>
 	</sdpi-item>
 
+	<!-- ── Pick from library to pin ──────────────────────────── -->
+	<div class="section">
+		<button id="load-games-btn" class="btn">Pick a game to pin…</button>
+		<input id="game-search" type="text" placeholder="Search…" style="display:none;" />
+		<div id="game-list-wrap" style="display:none;">
+			<div id="game-status">Press "Pick a game to pin" to fetch your library.</div>
+		</div>
+	</div>
+
 	<details>
 		<summary style="color: #969696; cursor: pointer; padding: 8px 0; font-size: 12px;">
 			How it works
 		</summary>
 		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
-			<p><strong>Press the key</strong> to load the currently running game's achievements. Or pick a game above to load it immediately.</p>
-			<p><strong>Load my games:</strong> Fetches your Steam library. Click any game to load its achievements into the grid right away.</p>
-			<p><strong>Game App ID:</strong> Leave empty to auto-detect the running game, or type a specific App ID (the number in store.steampowered.com/app/<strong>440</strong>/).</p>
-			<p>The plugin automatically switches to the correct grid profile for your device.</p>
+			<p><strong>Browse library on grid:</strong> Switches the grid to games mode — browse all your games as tiles. Click a tile to load its achievements.</p>
+			<p><strong>Press the key:</strong> Loads the currently running game's achievements (or the pinned game if set). If no game is running, opens the games browser.</p>
+			<p><strong>Game App ID:</strong> Pin a specific game (the number in store.steampowered.com/app/<strong>440</strong>/). Leave empty for auto-detect.</p>
 		</div>
 	</details>
 
 	<script>
+		const browseBtn   = document.getElementById('browse-grid-btn');
 		const loadBtn     = document.getElementById('load-games-btn');
 		const searchInput = document.getElementById('game-search');
 		const listWrap    = document.getElementById('game-list-wrap');
@@ -106,13 +117,23 @@
 		let allGames = [];
 		let selectedAppId = null;
 
-		// Mark the currently selected game on PI open
 		streamDeckClient.getSettings().then(({ payload }) => {
 			const appId = payload?.settings?.appId;
 			if (appId) selectedAppId = Number(appId);
 		}).catch(() => {});
 
-		// ── Load games button ──────────────────────────────────
+		// ── Browse on grid button ──────────────────────────────
+		browseBtn.addEventListener('click', () => {
+			browseBtn.disabled = true;
+			browseBtn.textContent = 'Browsing…';
+			streamDeckClient.sendToPlugin({ type: 'browseGames' });
+			setTimeout(() => {
+				browseBtn.disabled = false;
+				browseBtn.textContent = 'Browse library on grid';
+			}, 2000);
+		});
+
+		// ── Pick a game to pin button ──────────────────────────
 		loadBtn.addEventListener('click', () => {
 			loadBtn.disabled = true;
 			loadBtn.textContent = 'Loading…';
@@ -138,7 +159,7 @@
 				allGames = payload.games.sort((a, b) => a.name.localeCompare(b.name));
 				renderGameList(allGames);
 				loadBtn.disabled = false;
-				loadBtn.textContent = `${allGames.length} games loaded`;
+				loadBtn.textContent = `${allGames.length} games — pick to pin`;
 			} else if (payload.type === 'gamesError') {
 				listWrap.style.display = 'block';
 				statusEl.textContent = payload.message ?? 'Error loading games.';
@@ -171,7 +192,7 @@
 				listWrap.appendChild(div);
 			}
 
-			searchInput.style.display = games.length > 10 ? '' : 'none';
+			searchInput.style.display = games.length > 8 ? '' : 'none';
 			searchInput.value = '';
 		}
 
