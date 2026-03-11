@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill in as much detail as possible.
+
+  - type: input
+    id: version
+    attributes:
+      label: Plugin Version
+      description: Which version of Steam Achievement Hunter are you using?
+      placeholder: "0.1.1"
+    validations:
+      required: true
+
+  - type: input
+    id: streamdeck
+    attributes:
+      label: Stream Deck Software Version
+      placeholder: "6.8"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Stream Deck Device
+      options:
+        - Stream Deck (Standard / MK.2)
+        - Stream Deck Mini
+        - Stream Deck XL
+        - Stream Deck +
+        - Stream Deck Neo
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Add Achievement Radar to a key
+        2. Start a Steam game
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Paste any relevant log output from `com.maxik.steam-achievements.sdPlugin/logs/`
+      render: text

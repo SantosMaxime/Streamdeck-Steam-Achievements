@@ -1,6 +1,6 @@
 {
 	"name": "steam-achievement-hunter",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"type": "module",
 	"scripts": {
 		"build": "rollup -c",
@@ -10,7 +10,8 @@
 		"simulate": "tsx src/simulator/simulate.ts",
 		"package": "npm run gen-icons && npm run gen-profiles && npm run build && streamdeck pack com.maxik.steam-achievements.sdPlugin --force",
 		"gen-profiles": "node scripts/gen-profiles.mjs",
-		"gen-icons": "tsx scripts/generate-icons.ts"
+		"gen-icons": "tsx scripts/generate-icons.ts",
+		"bump": "node scripts/bump-version.mjs"
 	},
 	"dependencies": {
 		"@elgato/streamdeck": "^2.0.1"
