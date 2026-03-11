@@ -2,7 +2,8 @@
  * Version bump script for Steam Achievement Hunter.
  *
  * Keeps package.json (semver 3-part) and manifest.json (4-part) in sync.
- * Creates a git commit and tag for the new version.
+ * Creates a release commit on dev — the git tag is created by CI once
+ * the PR is merged to main.
  *
  * Usage:
  *   node scripts/bump-version.mjs patch   # 0.1.1 → 0.1.2
@@ -76,11 +77,17 @@ if (insertPoint !== -1) {
 }
 console.log(`  ✔ CHANGELOG.md → added [${semver}] entry`);
 
-// ── Git commit + tag ─────────────────────────────────────────
+// ── Git commit ───────────────────────────────────────────────
+// Note: no tag is created here — the release workflow creates the tag
+// on main after the PR is merged, ensuring releases are always from main.
 
 execSync(`git add package.json "com.maxik.steam-achievements.sdPlugin/manifest.json" CHANGELOG.md`, { cwd: root, stdio: "inherit" });
 execSync(`git commit -m "release: v${semver}"`, { cwd: root, stdio: "inherit" });
-execSync(`git tag "v${semver}"`, { cwd: root, stdio: "inherit" });
 
-console.log(`\n✔ Committed and tagged v${semver}`);
-console.log(`  Push with: git push origin dev --follow-tags`);
+console.log(`\n✔ Committed v${semver}`);
+console.log(`  Next steps:`);
+console.log(`    1. Fill in CHANGELOG.md for [${semver}]`);
+console.log(`    2. git add CHANGELOG.md && git commit --amend --no-edit`);
+console.log(`    3. git push origin dev`);
+console.log(`    4. Open PR: dev → main`);
+console.log(`    5. Merge PR → CI creates the tag and publishes the release automatically`);

@@ -113,23 +113,25 @@ When adding a new action or service, add corresponding tests in `src/__tests__/`
 
 ## Releasing
 
-Releases use a **tag-on-`dev` → PR → merge** flow:
+Releases use a **bump on `dev` → PR → merge to `main`** flow. The git tag and GitHub Release are created automatically by CI once the PR lands on `main` — tags are never pushed manually.
 
 ```bash
-# 1. On dev — bump version, update changelog
+# 1. On dev — bump version (creates a release commit, no tag)
 npm run bump patch   # or minor / major
-# CHANGELOG.md now has a blank [x.y.z] entry — fill it in
+
+# 2. Fill in the blank CHANGELOG.md entry for the new version
 git add CHANGELOG.md
 git commit --amend --no-edit
 
-# 2. Push dev + the new tag
-git push origin dev --follow-tags
+# 3. Push dev
+git push origin dev
 
-# 3. Open a PR: dev → main on GitHub
-# CI runs automatically on the PR
+# 4. Open a PR: dev → main on GitHub
+# CI runs automatically on the PR (type-check + test + build)
 
-# 4. Merge the PR once CI is green
-# The tag is now reachable from main — the Release workflow fires:
+# 5. Merge the PR once CI is green
+# The release workflow detects the "release:" commit on main and:
+#   → creates the git tag on main
 #   → builds, packages, creates GitHub Release with .streamDeckPlugin
 ```
 
