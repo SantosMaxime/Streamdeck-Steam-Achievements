@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Game Browser - Settings</title>
+	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
+	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
+	<style>
+		#game-picker-section { margin-top: 4px; }
+		#game-search {
+			width: 100%;
+			box-sizing: border-box;
+			background: #1e1e1e;
+			border: 1px solid #3a3a3a;
+			color: #d4d4d4;
+			padding: 5px 8px;
+			border-radius: 3px;
+			font-size: 12px;
+			margin-bottom: 4px;
+		}
+		#game-search:focus { outline: none; border-color: #5a5a5a; }
+		#game-list-wrap {
+			height: 140px;
+			overflow-y: auto;
+			background: #1e1e1e;
+			border: 1px solid #3a3a3a;
+			border-radius: 3px;
+		}
+		#game-list-wrap::-webkit-scrollbar { width: 6px; }
+		#game-list-wrap::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+		.game-item {
+			padding: 4px 8px;
+			font-size: 11px;
+			color: #c8c8c8;
+			cursor: pointer;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.game-item:hover { background: #2d2d2d; }
+		.game-item.selected { background: #0078d4; color: #fff; }
+		#game-status {
+			font-size: 11px;
+			color: #969696;
+			padding: 4px 8px;
+		}
+		#load-games-btn {
+			background: #2d2d2d;
+			border: 1px solid #3a3a3a;
+			color: #c8c8c8;
+			padding: 4px 10px;
+			border-radius: 3px;
+			font-size: 11px;
+			cursor: pointer;
+			margin-bottom: 6px;
+		}
+		#load-games-btn:hover { background: #3d3d3d; }
+		#load-games-btn:disabled { opacity: 0.5; cursor: default; }
+	</style>
+</head>
+<body>
+	<!-- ── Global settings (shared with all actions) ────────────── -->
+
+	<sdpi-item label="Steam API Key">
+		<sdpi-textfield
+			setting="apiKey"
+			global
+			type="password"
+			placeholder="Enter your Steam Web API key"
+			required
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Get your key">
+		<sdpi-link url="https://steamcommunity.com/dev/apikey">steamcommunity.com/dev/apikey</sdpi-link>
+	</sdpi-item>
+
+	<sdpi-item label="Steam ID (64-bit)">
+		<sdpi-textfield
+			setting="steamId"
+			global
+			placeholder="e.g. 76561198012345678"
+			required
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Find your ID">
+		<sdpi-link url="https://steamid.io/">steamid.io</sdpi-link>
+	</sdpi-item>
+
+	<!-- ── Game Browser settings ─────────────────────────────────── -->
+
+	<hr style="border-color: #3a3a3a; margin: 12px 0;" />
+
+	<!-- Game picker -->
+	<sdpi-item label="Pick a game" id="game-picker-section">
+		<div style="width:100%;">
+			<button id="load-games-btn">Load my games</button>
+			<input id="game-search" type="text" placeholder="Search…" style="display:none;" />
+			<div id="game-list-wrap" style="display:none;">
+				<div id="game-status">Press "Load my games" to fetch your library.</div>
+			</div>
+		</div>
+	</sdpi-item>
+
+	<sdpi-item label="Game App ID">
+		<sdpi-textfield
+			setting="appId"
+			id="appid-field"
+			type="number"
+			placeholder="Auto-detect running game"
+			min="1"
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Auto-switch profile">
+		<sdpi-checkbox setting="autoSwitchProfile">
+			Switch to grid profile automatically (default: on)
+		</sdpi-checkbox>
+	</sdpi-item>
+
+	<sdpi-item label="Profile override">
+		<sdpi-textfield
+			setting="profileName"
+			placeholder="Leave empty for bundled auto-profile"
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<details>
+		<summary style="color: #969696; cursor: pointer; padding: 8px 0; font-size: 12px;">
+			How it works
+		</summary>
+		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
+			<p><strong>Press the key</strong> to load a game's achievements into the grid and automatically switch to the grid profile.</p>
+			<p><strong>Pick a game:</strong> Use "Load my games" to browse your Steam library and pick a game. The App ID field is set automatically when you click a game.</p>
+			<p><strong>Game App ID:</strong> Leave empty to detect the currently running game. Or set a specific App ID to always load that game. Find IDs on store.steampowered.com (the number in /app/<strong>440</strong>/).</p>
+			<p><strong>Auto profile:</strong> The plugin ships with bundled grid profiles for all Stream Deck models — Standard, Mini, XL, +, and Neo. The correct one is selected automatically based on your device. No setup needed.</p>
+			<p><strong>Profile override:</strong> If you want to use your own custom profile instead of the bundled one, enter its exact name here (as defined in your Stream Deck software).</p>
+		</div>
+	</details>
+
+	<script>
+		// ── State ─────────────────────────────────────────────
+		let allGames = [];
+		let selectedAppId = null;
+
+		const loadBtn    = document.getElementById('load-games-btn');
+		const searchInput = document.getElementById('game-search');
+		const listWrap   = document.getElementById('game-list-wrap');
+		const statusEl   = document.getElementById('game-status');
+
+		// ── Load current settings to mark selected game ───────
+		streamDeckClient.getSettings().then(({ payload }) => {
+			const appId = payload?.settings?.appId;
+			if (appId) selectedAppId = Number(appId);
+		}).catch(() => {});
+
+		// ── Load games button ─────────────────────────────────
+		loadBtn.addEventListener('click', () => {
+			loadBtn.disabled = true;
+			loadBtn.textContent = 'Loading…';
+			searchInput.style.display = 'none';
+			listWrap.style.display = 'block';
+			statusEl.style.display = 'block';
+			statusEl.textContent = 'Fetching your library…';
+			// Clear old list items
+			for (const el of listWrap.querySelectorAll('.game-item')) el.remove();
+			streamDeckClient.sendToPlugin({ type: 'requestGames' });
+		});
+
+		// ── Filter game list ──────────────────────────────────
+		searchInput.addEventListener('input', () => {
+			const q = searchInput.value.toLowerCase();
+			for (const el of listWrap.querySelectorAll('.game-item')) {
+				el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+			}
+		});
+
+		// ── Receive messages from plugin ──────────────────────
+		streamDeckClient.onSendToPropertyInspector(({ payload }) => {
+			if (payload.type === 'games') {
+				allGames = payload.games.sort((a, b) => a.name.localeCompare(b.name));
+				renderGameList(allGames);
+				loadBtn.disabled = false;
+				loadBtn.textContent = `${allGames.length} games loaded`;
+			} else if (payload.type === 'gamesError') {
+				statusEl.textContent = payload.message ?? 'Error loading games.';
+				statusEl.style.display = 'block';
+				loadBtn.disabled = false;
+				loadBtn.textContent = 'Retry';
+			}
+		});
+
+		function renderGameList(games) {
+			// Remove status + old items
+			statusEl.style.display = 'none';
+			for (const el of listWrap.querySelectorAll('.game-item')) el.remove();
+
+			if (games.length === 0) {
+				statusEl.textContent = 'No games found.';
+				statusEl.style.display = 'block';
+				return;
+			}
+
+			for (const game of games) {
+				const div = document.createElement('div');
+				div.className = 'game-item';
+				div.dataset.appid = String(game.appid);
+				div.dataset.name = game.name;
+				div.textContent = game.name;
+				if (selectedAppId && game.appid === selectedAppId) {
+					div.classList.add('selected');
+				}
+				div.addEventListener('click', () => selectGame(game));
+				listWrap.appendChild(div);
+			}
+
+			// Show search only when there are enough games
+			searchInput.style.display = games.length > 10 ? '' : 'none';
+			searchInput.value = '';
+		}
+
+		function selectGame(game) {
+			selectedAppId = game.appid;
+			// Highlight selection
+			for (const el of listWrap.querySelectorAll('.game-item')) {
+				el.classList.toggle('selected', el.dataset.appid === String(game.appid));
+			}
+			// Update the appId setting via streamDeckClient
+			streamDeckClient.getSettings().then(({ payload }) => {
+				const current = payload?.settings ?? {};
+				streamDeckClient.setSettings({ ...current, appId: game.appid });
+			}).catch(() => {
+				streamDeckClient.setSettings({ appId: game.appid });
+			});
+		}
+	</script>
+</body>
+</html>

@@ -138,6 +138,25 @@ export class SteamApiClient {
 	}
 
 	/**
+	 * Get global achievement unlock percentages for a game.
+	 * Returns a map of apiname → global unlock percentage (0–100).
+	 */
+	async getGlobalAchievementPercentages(appId: number): Promise<Map<string, number>> {
+		const url = `${STEAM_API_BASE}/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${appId}`;
+		const data = await this.fetchCached<{
+			achievementpercentages: { achievements: { name: string; percent: number }[] };
+		}>(`rarity-${appId}`, url);
+
+		const map = new Map<string, number>();
+		if (data?.achievementpercentages?.achievements) {
+			for (const a of data.achievementpercentages.achievements) {
+				map.set(a.name, a.percent);
+			}
+		}
+		return map;
+	}
+
+	/**
 	 * Compute global stats: level, total achievements, perfect games.
 	 * This is an expensive operation - it iterates all games with achievements.
 	 */

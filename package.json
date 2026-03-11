@@ -8,7 +8,9 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"simulate": "tsx src/simulator/simulate.ts",
-		"package": "npm run build && streamdeck pack com.maxik.steam-achievements.sdPlugin --force"
+		"package": "npm run gen-icons && npm run gen-profiles && npm run build && streamdeck pack com.maxik.steam-achievements.sdPlugin --force",
+		"gen-profiles": "node scripts/gen-profiles.mjs",
+		"gen-icons": "tsx scripts/generate-icons.ts"
 	},
 	"dependencies": {
 		"@elgato/streamdeck": "^2.0.1"

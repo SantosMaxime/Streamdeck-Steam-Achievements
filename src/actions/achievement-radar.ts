@@ -7,11 +7,13 @@ import streamDeck, {
 	WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { getSteamApi } from "../services/steam-client-holder";
+import { getGridController } from "../services/grid-controller";
 import type { Achievement, AchievementSchema } from "../services/steam-api";
 
 type RadarSettings = {
 	refreshInterval?: number;               // seconds (default 60, min 10, max 600)
 	clickAction?: "youtube" | "steam";      // default "youtube"
+	autoLoadGrid?: boolean;                 // auto-load grid when game detected
 };
 
 const DEFAULT_INTERVAL = 60;
@@ -158,6 +160,13 @@ export class AchievementRadar extends SingletonAction<RadarSettings> {
 			}
 
 			this.currentGameName = game.name;
+
+			// Auto-load grid when a new game is detected
+			if (this.appearEvent?.payload.settings.autoLoadGrid && game.appId !== this.lastAppId) {
+				getGridController().loadGame(game.appId).catch(() => {
+					// non-fatal — grid loading failure shouldn't break radar
+				});
+			}
 
 			// Step 2: get achievements (merged with schema)
 			const achievements = await this.getMergedAchievements(game.appId);

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Achievement Grid - Settings</title>
+	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
+	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
+</head>
+<body>
+	<!-- ── Global settings (shared with all actions) ────────────── -->
+
+	<sdpi-item label="Steam API Key">
+		<sdpi-textfield
+			setting="apiKey"
+			global
+			type="password"
+			placeholder="Enter your Steam Web API key"
+			required
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Get your key">
+		<sdpi-link url="https://steamcommunity.com/dev/apikey">steamcommunity.com/dev/apikey</sdpi-link>
+	</sdpi-item>
+
+	<sdpi-item label="Steam ID (64-bit)">
+		<sdpi-textfield
+			setting="steamId"
+			global
+			placeholder="e.g. 76561198012345678"
+			required
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Find your ID">
+		<sdpi-link url="https://steamid.io/">steamid.io</sdpi-link>
+	</sdpi-item>
+
+	<!-- ── Grid-specific settings ────────────────────────────────── -->
+
+	<hr style="border-color: #3a3a3a; margin: 12px 0;" />
+
+	<sdpi-item label="Slot Index">
+		<sdpi-textfield
+			setting="slotIndex"
+			type="number"
+			placeholder="Auto"
+			min="0"
+			max="99"
+		></sdpi-textfield>
+	</sdpi-item>
+
+	<sdpi-item label="Click action">
+		<sdpi-select setting="clickAction">
+			<option value="youtube">Open YouTube Guide</option>
+			<option value="steam">Open Steam Guides</option>
+		</sdpi-select>
+	</sdpi-item>
+
+	<hr style="border-color: #3a3a3a; margin: 12px 0;" />
+
+	<sdpi-item label="Open Profile">
+		<sdpi-textfield
+			setting="targetProfile"
+			placeholder="e.g. profiles/grid-standard"
+		></sdpi-textfield>
+	</sdpi-item>
+	<sdpi-item label="">
+		<span style="color: #969696; font-size: 11px; line-height: 1.5;">
+			<strong>Grid: Back only.</strong> Enter a profile name to make this key <em>open</em>
+			that profile instead of going back. Leave empty for the default "go back" behaviour.
+			Place this on your main profile to jump straight to the achievement grid at any time.
+		</span>
+	</sdpi-item>
+
+	<details>
+		<summary style="color: #969696; cursor: pointer; padding: 8px 0; font-size: 12px;">
+			How to use the grid
+		</summary>
+		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
+			<p><strong>Grid Cell:</strong> Place multiple cells on your Stream Deck to create a gallery of achievement icons. Each cell shows one achievement with a rarity-colored border.</p>
+			<p><strong>Slot Index:</strong> Leave as "Auto" for automatic ordering, or set a specific number (0-based) to control which grid position this cell occupies.</p>
+			<p><strong>Navigation:</strong> Add "Grid: Previous Page" and "Grid: Next Page" actions to paginate through all achievements.</p>
+			<p><strong>Info & Sort:</strong> Add "Grid: Info & Sort" to see progress stats. Press it to cycle through sort modes: Default, Rarest First, Alphabetical, Locked Only, Unlocked Only.</p>
+			<p><strong>Color legend:</strong> Gray border = Common (>50%), Green = Uncommon (20-50%), Blue = Rare (5-20%), Purple = Ultra Rare (1-5%), Gold = Legendary (<1%).</p>
+		</div>
+	</details>
+</body>
+</html>

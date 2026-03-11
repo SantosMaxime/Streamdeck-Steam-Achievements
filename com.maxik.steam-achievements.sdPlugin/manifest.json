@@ -9,7 +9,7 @@
 	"Icon": "imgs/plugin/marketplace",
 	"SDKVersion": 2,
 	"Software": {
-		"MinimumVersion": "6.5"
+		"MinimumVersion": "6.6"
 	},
 	"OS": [
 		{
@@ -22,6 +22,43 @@
 		"Debug": "enabled"
 	},
 	"UUID": "com.maxik.steam-achievements",
+	"Profiles": [
+		{
+			"Name": "profiles/grid-standard",
+			"DeviceType": 0,
+			"AutoInstall": true,
+			"DontAutoSwitchWhenInstalled": false,
+			"Readonly": false
+		},
+		{
+			"Name": "profiles/grid-mini",
+			"DeviceType": 1,
+			"AutoInstall": true,
+			"DontAutoSwitchWhenInstalled": false,
+			"Readonly": false
+		},
+		{
+			"Name": "profiles/grid-xl",
+			"DeviceType": 2,
+			"AutoInstall": true,
+			"DontAutoSwitchWhenInstalled": false,
+			"Readonly": false
+		},
+		{
+			"Name": "profiles/grid-plus",
+			"DeviceType": 7,
+			"AutoInstall": true,
+			"DontAutoSwitchWhenInstalled": false,
+			"Readonly": false
+		},
+		{
+			"Name": "profiles/grid-plus",
+			"DeviceType": 9,
+			"AutoInstall": true,
+			"DontAutoSwitchWhenInstalled": false,
+			"Readonly": false
+		}
+	],
 	"Actions": [
 		{
 			"Name": "Dashboard: Steam Level",
@@ -86,6 +123,125 @@
 			"States": [
 				{
 					"Image": "imgs/actions/radar/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 9
+				}
+			]
+		},
+		{
+			"Name": "Grid: Achievement Cell",
+			"UUID": "com.maxik.steam-achievements.grid-cell",
+			"Icon": "imgs/actions/grid-cell/icon",
+			"Tooltip": "Displays a single achievement from the grid. Place multiple cells to create a gallery view.",
+			"PropertyInspectorPath": "ui/grid.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/grid-cell/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 8
+				}
+			]
+		},
+		{
+			"Name": "Grid: Previous Page",
+			"UUID": "com.maxik.steam-achievements.grid-prev",
+			"Icon": "imgs/actions/grid-nav/icon",
+			"Tooltip": "Navigate to the previous page of achievements.",
+			"PropertyInspectorPath": "ui/grid.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/grid-nav/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10
+				}
+			]
+		},
+		{
+			"Name": "Grid: Next Page",
+			"UUID": "com.maxik.steam-achievements.grid-next",
+			"Icon": "imgs/actions/grid-nav/icon",
+			"Tooltip": "Navigate to the next page of achievements.",
+			"PropertyInspectorPath": "ui/grid.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/grid-nav/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10
+				}
+			]
+		},
+		{
+			"Name": "Grid: Back",
+			"UUID": "com.maxik.steam-achievements.grid-back",
+			"Icon": "imgs/actions/grid-nav/icon",
+			"Tooltip": "Return to the previous Stream Deck profile, or open a specific profile when a target is configured. Place on any profile to jump straight to the achievement grid.",
+			"PropertyInspectorPath": "ui/grid.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/grid-nav/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10
+				}
+			]
+		},
+		{
+			"Name": "Grid: Info & Sort",
+			"UUID": "com.maxik.steam-achievements.grid-info",
+			"Icon": "imgs/actions/grid-info/icon",
+			"Tooltip": "Shows game progress ring. Press to cycle sort mode (default, rarest, alphabetical, locked only, unlocked only).",
+			"PropertyInspectorPath": "ui/grid.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/grid-info/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 8
+				}
+			]
+		},
+		{
+			"Name": "Game Browser",
+			"UUID": "com.maxik.steam-achievements.game-browser",
+			"Icon": "imgs/actions/game-browser/icon",
+			"Tooltip": "Select a game from your library to load into the achievement grid.",
+			"PropertyInspectorPath": "ui/game-browser.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/game-browser/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 9
+				}
+			]
+		},
+		{
+			"Name": "Daily Pick",
+			"UUID": "com.maxik.steam-achievements.daily-pick",
+			"Icon": "imgs/actions/daily-pick/icon",
+			"Tooltip": "Suggests a random locked achievement each day. Press to open a guide.",
+			"PropertyInspectorPath": "ui/daily-pick.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/daily-pick/key",
 					"TitleAlignment": "bottom",
 					"FontSize": 9
 				}

@@ -36,5 +36,15 @@ const files = [
 	[SD+"/imgs/actions/dashboard/key@2x.png",     144, 144, 70,130,180],
 	[SD+"/imgs/actions/radar/icon@2x.png",         40,  40, 218,165,32],
 	[SD+"/imgs/actions/radar/key@2x.png",         144, 144, 218,165,32],
+	[SD+"/imgs/actions/grid-cell/icon@2x.png",     40,  40, 168,85,247],
+	[SD+"/imgs/actions/grid-cell/key@2x.png",     144, 144, 168,85,247],
+	[SD+"/imgs/actions/grid-nav/icon@2x.png",      40,  40, 107,114,128],
+	[SD+"/imgs/actions/grid-nav/key@2x.png",      144, 144, 107,114,128],
+	[SD+"/imgs/actions/grid-info/icon@2x.png",     40,  40, 59,130,246],
+	[SD+"/imgs/actions/grid-info/key@2x.png",     144, 144, 59,130,246],
+	[SD+"/imgs/actions/game-browser/icon@2x.png",  40,  40, 34,197,94],
+	[SD+"/imgs/actions/game-browser/key@2x.png",  144, 144, 34,197,94],
+	[SD+"/imgs/actions/daily-pick/icon@2x.png",    40,  40, 245,158,11],
+	[SD+"/imgs/actions/daily-pick/key@2x.png",    144, 144, 245,158,11],
 ];
 for (const [p,w,h,r,g,b] of files) { writeFileSync(p, png(w,h,r,g,b)); console.log("OK "+p+"  ("+w+"x"+h+")"); }
