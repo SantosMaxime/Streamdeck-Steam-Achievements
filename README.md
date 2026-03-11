@@ -163,18 +163,31 @@ cd Streamdeck-Steam-Achievements
 # Install dependencies
 npm install
 
+# Register plugin with Stream Deck (one-time, required!)
+# This makes the plugin visible in Stream Deck software
+streamdeck link com.maxik.steam-achievements.sdPlugin
+
+# Then close and reopen Stream Deck software completely
+# The plugin should now appear in the sidebar
+```
+
+Once registered, you can start development:
+
+```bash
 # Run tests
 npm test
 
 # Build the plugin
 npm run build
 
-# Watch mode (auto-rebuilds + restarts Stream Deck plugin)
+# Watch mode (auto-rebuilds + restarts Stream Deck plugin on file changes)
 npm run watch
 
-# Run the terminal-based radar simulator
+# In another terminal, run the terminal-based radar simulator
 npm run simulate
 ```
+
+**⚠️ Important:** The `streamdeck link` command is **required once** before the plugin will appear in Stream Deck. Without it, the plugin exists only in your source code but isn't visible to the app.
 
 ### Available Scripts
 
@@ -189,6 +202,17 @@ npm run simulate
 | `npm run gen-profiles` | Regenerate `.streamDeckProfile` bundles |
 | `npm run package` | Full release pipeline: icons + profiles + build + pack |
 | `npm run bump <patch\|minor\|major>` | Bump version in package.json + manifest.json, commit + tag |
+
+### Stream Deck CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `streamdeck link com.maxik.steam-achievements.sdPlugin` | **[Required]** Register the plugin with Stream Deck (one-time) |
+| `streamdeck restart com.maxik.steam-achievements` | Restart the plugin (used by `npm run watch`) |
+| `streamdeck stop com.maxik.steam-achievements` | Stop the plugin |
+| `streamdeck unlink com.maxik.steam-achievements` | Unregister the plugin from Stream Deck |
+| `streamdeck list` | List all installed plugins |
+| `streamdeck validate com.maxik.steam-achievements.sdPlugin` | Validate plugin structure and manifest |
 
 ---
 
