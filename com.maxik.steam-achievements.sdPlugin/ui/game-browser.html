@@ -84,29 +84,15 @@
 		></sdpi-textfield>
 	</sdpi-item>
 
-	<sdpi-item label="Auto-switch profile">
-		<sdpi-checkbox setting="autoSwitchProfile">
-			Switch to grid profile automatically (default: on)
-		</sdpi-checkbox>
-	</sdpi-item>
-
-	<sdpi-item label="Profile override">
-		<sdpi-textfield
-			setting="profileName"
-			placeholder="Leave empty for bundled auto-profile"
-		></sdpi-textfield>
-	</sdpi-item>
-
 	<details>
 		<summary style="color: #969696; cursor: pointer; padding: 8px 0; font-size: 12px;">
 			How it works
 		</summary>
 		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
-			<p><strong>Press the key</strong> to load a game's achievements into the grid and automatically switch to the grid profile.</p>
-			<p><strong>Pick a game:</strong> Use "Load my games" to browse your Steam library and pick a game. The App ID field is set automatically when you click a game.</p>
-			<p><strong>Game App ID:</strong> Leave empty to detect the currently running game. Or set a specific App ID to always load that game. Find IDs on store.steampowered.com (the number in /app/<strong>440</strong>/).</p>
-			<p><strong>Auto profile:</strong> The plugin ships with bundled grid profiles for all Stream Deck models — Standard, Mini, XL, +, and Neo. The correct one is selected automatically based on your device. No setup needed.</p>
-			<p><strong>Profile override:</strong> If you want to use your own custom profile instead of the bundled one, enter its exact name here (as defined in your Stream Deck software).</p>
+			<p><strong>Press the key</strong> to load the currently running game's achievements. Or pick a game below to load it immediately.</p>
+			<p><strong>Load my games:</strong> Fetches your Steam library. Click any game to load its achievements into the grid right away.</p>
+			<p><strong>Game App ID:</strong> Leave empty to auto-detect the running game, or type a specific App ID (the number in store.steampowered.com/app/<strong>440</strong>/).</p>
+			<p>The plugin automatically switches to the correct grid profile for your device.</p>
 		</div>
 	</details>
 
@@ -197,13 +183,14 @@
 			for (const el of listWrap.querySelectorAll('.game-item')) {
 				el.classList.toggle('selected', el.dataset.appid === String(game.appid));
 			}
-			// Update the appId setting via streamDeckClient
+			// Save the appId setting and immediately load the game into the grid
 			streamDeckClient.getSettings().then(({ payload }) => {
 				const current = payload?.settings ?? {};
 				streamDeckClient.setSettings({ ...current, appId: game.appid });
 			}).catch(() => {
 				streamDeckClient.setSettings({ appId: game.appid });
 			});
+			streamDeckClient.sendToPlugin({ type: 'loadGame', appId: game.appid });
 		}
 	</script>
 </body>

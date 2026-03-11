@@ -6,7 +6,9 @@
  * when a singleton shares a single `mySlot` value across all key instances.
  *
  * Slot index is stored in the action's bundled settings (set by the profile
- * manifest) or falls back to 0.
+ * manifest). If unset — e.g. when a user manually adds a new grid cell —
+ * the slot is auto-calculated from the key's physical position on the deck
+ * and saved back so it persists.
  *
  * Press → opens a YouTube or Steam guide for the displayed achievement.
  */
@@ -21,6 +23,7 @@ import streamDeck, {
 } from "@elgato/streamdeck";
 import { getGridController, type GridAchievement } from "../services/grid-controller";
 import { getSteamApi } from "../services/steam-client-holder";
+import { DEVICE_PROFILE } from "../services/device-profiles";
 import {
 	renderLockedCell,
 	renderUnlockedCell,
@@ -58,9 +61,21 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 	private globalSettingsDisposable?: { dispose: () => void };
 
 	override async onWillAppear(ev: WillAppearEvent<GridCellSettings>): Promise<void> {
-		const slot = ev.payload.settings.slotIndex ?? 0;
+		let slot = ev.payload.settings.slotIndex;
+
+		// If slotIndex is not set (e.g. user manually added a new grid cell),
+		// calculate it from the physical key position on the deck.
+		if (slot === undefined || slot === null) {
+			const coords = "coordinates" in ev.payload ? ev.payload.coordinates : undefined;
+			const deviceType = ev.action.device.type as number;
+			const cols = DEVICE_PROFILE[deviceType]?.cols ?? 5;
+			slot = coords ? coords.row * cols + coords.column : 0;
+			// Persist the calculated value so it sticks
+			await ev.action.setSettings({ ...ev.payload.settings, slotIndex: slot });
+		}
+
 		this.cells.set(ev.action.id, {
-			slotIndex: slot,
+			slotIndex: slot ?? 0,
 			achievement: null,
 			celebrationFrame: 0,
 			celebrationIconBase64: null,
