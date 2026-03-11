@@ -29,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `package.json` and `manifest.json` versions re-synced to `0.1.1` / `0.1.1.0`
 - `.streamDeckPlugin` distributable removed from repository (now produced exclusively by the CI release workflow)
 
-## [0.1.1] - 2025-05-20
+## [0.1.1] - 2026-03-11
 
 ### Added
 - Auto profiles for all Stream Deck device types (Standard, Mini, XL, Plus/Neo)
@@ -40,7 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Auto slot assignment issues
 - Display refresh timing
 
-## [0.1.0] - 2025-05-18
+## [0.1.0] - 2026-03-11
 
 ### Added
 - Initial release of Steam Achievement Hunter
