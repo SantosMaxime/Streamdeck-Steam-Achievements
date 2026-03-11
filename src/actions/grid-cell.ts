@@ -21,7 +21,7 @@ import streamDeck, {
 	WillAppearEvent,
 	WillDisappearEvent,
 } from "@elgato/streamdeck";
-import { getGridController, type GridAchievement, type SortMode } from "../services/grid-controller";
+import { getGridController, type GridAchievement } from "../services/grid-controller";
 import { getSteamApi } from "../services/steam-client-holder";
 import { DEVICE_PROFILE } from "../services/device-profiles";
 import {
@@ -36,7 +36,6 @@ type GridCellSettings = {
 	/** Slot index (0-indexed, set in the bundled profile manifest). */
 	slotIndex?: number;
 	clickAction?: "youtube" | "steam";
-	sortMode?: SortMode;
 };
 
 interface CellState {
@@ -110,11 +109,6 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 			state.slotIndex = newSlot;
 			await this.renderActionSlot(ev.action, state);
 		}
-
-		const newSort = ev.payload.settings.sortMode;
-		if (newSort && newSort !== getGridController().getSortMode()) {
-			await getGridController().setSortMode(newSort);
-		}
 	}
 
 	override async onWillDisappear(ev: WillDisappearEvent<GridCellSettings>): Promise<void> {
@@ -181,7 +175,7 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 				return;
 			}
 			const api = getSteamApi();
-			const imgUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
+			const imgUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900.jpg`;
 			const imageDataUri = api ? await api.fetchImageAsDataUri(imgUrl) : null;
 			await actionObj.setImage(renderGameCell(game.name, imageDataUri));
 			await actionObj.setTitle("");

@@ -238,15 +238,15 @@ export function renderProfileLauncherKey(label: string): string {
 
 /**
  * Game tile — shown when the grid is in "games" mode.
- * Shows the Steam header image when available, or splits the game name across
- * two lines with a teal border as a fallback.
+ * Shows the Steam library portrait image (600×900) scaled to fit without deformation:
+ *   xMidYMid meet → full image visible, dark background fills letterbox gaps.
+ * Falls back to splitting the game name across two lines with a teal border.
  */
 export function renderGameCell(name: string, imageDataUri: string | null = null): string {
 	if (imageDataUri) {
 		const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <image href="${imageDataUri}" x="0" y="0" width="${SIZE}" height="${SIZE}" preserveAspectRatio="xMidYMid slice"/>
-  <rect x="0" y="${SIZE - 22}" width="${SIZE}" height="22" fill="rgba(0,0,0,0.65)"/>
-  <text x="${SIZE / 2}" y="${SIZE - 7}" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#0d9488">CLICK TO LOAD</text>
+  <rect width="${SIZE}" height="${SIZE}" fill="#0d0d0d"/>
+  <image href="${imageDataUri}" x="0" y="0" width="${SIZE}" height="${SIZE}" preserveAspectRatio="xMidYMid meet"/>
 </svg>`;
 		return svgToDataUri(svg);
 	}
@@ -271,7 +271,6 @@ export function renderGameCell(name: string, imageDataUri: string | null = null)
   <rect x="2" y="2" width="${SIZE - 4}" height="${SIZE - 4}" fill="none" stroke="#0d9488" stroke-width="2" rx="8"/>
   <text x="${SIZE / 2}" y="${cy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0">${escapeXml(l1)}</text>
   ${l2 ? `<text x="${SIZE / 2}" y="${cy + 18}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0">${escapeXml(l2)}</text>` : ""}
-  <text x="${SIZE / 2}" y="130" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#0d9488">CLICK TO LOAD</text>
 </svg>`;
 	return svgToDataUri(svg);
 }

@@ -133,7 +133,7 @@
 			"UUID": "com.maxik.steam-achievements.grid-cell",
 			"Icon": "imgs/actions/grid-cell/icon",
 			"Tooltip": "Displays a single achievement from the grid. Place multiple cells to create a gallery view.",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-cell.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -150,7 +150,7 @@
 			"UUID": "com.maxik.steam-achievements.grid-prev",
 			"Icon": "imgs/actions/grid-nav/icon",
 			"Tooltip": "Navigate to the previous page of achievements.",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-prev.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -167,7 +167,7 @@
 			"UUID": "com.maxik.steam-achievements.grid-next",
 			"Icon": "imgs/actions/grid-nav/icon",
 			"Tooltip": "Navigate to the next page of achievements.",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-next.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -184,7 +184,7 @@
 			"UUID": "com.maxik.steam-achievements.grid-back",
 			"Icon": "imgs/actions/grid-nav/icon",
 			"Tooltip": "Return to the previous Stream Deck profile, or open a specific profile when a target is configured. Place on any profile to jump straight to the achievement grid.",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-back.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -201,7 +201,7 @@
 			"UUID": "com.maxik.steam-achievements.grid-info",
 			"Icon": "imgs/actions/grid-info/icon",
 			"Tooltip": "Shows game progress ring. Press to cycle sort mode (default, rarest, alphabetical, locked only, unlocked only).",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-info.html",
 			"Controllers": [
 				"Keypad"
 			],
