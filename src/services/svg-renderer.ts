@@ -186,3 +186,52 @@ export function renderDailyPickKey(): string {
 </svg>`;
 	return svgToDataUri(svg);
 }
+
+/**
+ * Settings key — gear icon with status text.
+ * state: "configured" (green), "unconfigured" (gray), "testing" (amber), "error" (red)
+ */
+export function renderSettingsKey(state: "configured" | "unconfigured" | "testing" | "error"): string {
+	const colors = {
+		configured:   { ring: "#22c55e", text: "#22c55e", label: "Configured ✓" },
+		unconfigured: { ring: "#6b7280", text: "#6b7280", label: "Not Configured" },
+		testing:      { ring: "#f59e0b", text: "#f59e0b", label: "Testing…" },
+		error:        { ring: "#ef4444", text: "#ef4444", label: "Error" },
+	};
+	const { ring, text, label } = colors[state];
+	const cx = SIZE / 2, cy = 58;
+	// Gear teeth: 8 rectangular prongs around the ring
+	const teeth = Array.from({ length: 8 }, (_, i) => {
+		const a = (i / 8) * Math.PI * 2;
+		const a1 = a - 0.18, a2 = a + 0.18;
+		const ri = 22, ro = 32;
+		return `M${cx + Math.cos(a1) * ri},${cy + Math.sin(a1) * ri} ` +
+			`L${cx + Math.cos(a1) * ro},${cy + Math.sin(a1) * ro} ` +
+			`A${ro},${ro},0,0,1,${cx + Math.cos(a2) * ro},${cy + Math.sin(a2) * ro} ` +
+			`L${cx + Math.cos(a2) * ri},${cy + Math.sin(a2) * ri} ` +
+			`A${ri},${ri},0,0,0,${cx + Math.cos(a1) * ri},${cy + Math.sin(a1) * ri}Z`;
+	}).join(" ");
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
+  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
+  <circle cx="${cx}" cy="${cy}" r="22" fill="none" stroke="${ring}" stroke-width="5"/>
+  <circle cx="${cx}" cy="${cy}" r="9" fill="${ring}"/>
+  <path d="${escapeXml(teeth)}" fill="${ring}"/>
+  <text x="${cx}" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="${text}">${escapeXml(label)}</text>
+</svg>`;
+	return svgToDataUri(svg);
+}
+
+/**
+ * Profile launcher key — two overlapping pages with a right-arrow to indicate switching.
+ */
+export function renderProfileLauncherKey(label: string): string {
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
+  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
+  <rect x="28" y="30" width="64" height="72" rx="6" fill="none" stroke="#22c55e" stroke-width="2" opacity="0.5"/>
+  <rect x="44" y="22" width="64" height="72" rx="6" fill="#1a1a2e" stroke="#22c55e" stroke-width="3"/>
+  <line x1="58" y1="58" x2="88" y2="58" stroke="#22c55e" stroke-width="4" stroke-linecap="round"/>
+  <polygon points="84,50 96,58 84,66" fill="#22c55e"/>
+  <text x="${SIZE / 2 + 4}" y="114" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#22c55e">${escapeXml(label)}</text>
+</svg>`;
+	return svgToDataUri(svg);
+}

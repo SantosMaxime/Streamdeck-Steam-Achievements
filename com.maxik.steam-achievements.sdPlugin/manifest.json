@@ -246,6 +246,40 @@
 					"FontSize": 9
 				}
 			]
+		},
+		{
+			"Name": "Settings",
+			"UUID": "com.maxik.steam-achievements.settings",
+			"Icon": "imgs/actions/settings/icon",
+			"Tooltip": "Configure your Steam API key and Steam ID once. Press to test the connection.",
+			"PropertyInspectorPath": "ui/settings.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/settings/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10
+				}
+			]
+		},
+		{
+			"Name": "Profile Launcher",
+			"UUID": "com.maxik.steam-achievements.profile-launcher",
+			"Icon": "imgs/actions/profile-launcher/icon",
+			"Tooltip": "Jump to the achievement grid profile. Auto-detects your device type or use a custom profile name.",
+			"PropertyInspectorPath": "ui/profile-launcher.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/profile-launcher/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10
+				}
+			]
 		}
 	]
 }

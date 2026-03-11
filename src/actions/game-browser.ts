@@ -30,6 +30,7 @@ import type { JsonValue } from "@elgato/utils";
 import { getGridController } from "../services/grid-controller";
 import { getSteamApi } from "../services/steam-client-holder";
 import { renderGameBrowserKey } from "../services/svg-renderer";
+import { DEVICE_PROFILE } from "../services/device-profiles";
 
 type GameBrowserSettings = {
 	/** Selected game appId (set from PI). Leave empty to auto-detect the running game. */
@@ -41,20 +42,6 @@ type GameBrowserSettings = {
 	profileName?: string;
 	/** When false, disables automatic profile switching entirely. Default: true. */
 	autoSwitchProfile?: boolean;
-};
-
-// ── Device → bundled profile mapping ──────────────────────
-
-/**
- * Maps a Stream Deck device type to the bundled profile name and number of
- * grid cell slots visible on one page.
- */
-const DEVICE_PROFILE: Record<number, { profile: string; pageSize: number }> = {
-	0: { profile: "profiles/grid-standard", pageSize: 10 },  // Standard 5×3
-	1: { profile: "profiles/grid-mini",     pageSize: 3  },  // Mini 3×2
-	2: { profile: "profiles/grid-xl",       pageSize: 24 },  // XL 8×4
-	7: { profile: "profiles/grid-plus",     pageSize: 4  },  // Stream Deck +
-	9: { profile: "profiles/grid-plus",     pageSize: 4  },  // Neo 4×2
 };
 
 @action({ UUID: "com.maxik.steam-achievements.game-browser" })
