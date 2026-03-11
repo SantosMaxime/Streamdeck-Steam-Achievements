@@ -209,7 +209,7 @@ npm run simulate
 | `npm run gen-icons` | Regenerate all PNG icons via software rasterizer |
 | `npm run gen-profiles` | Regenerate `.streamDeckProfile` bundles |
 | `npm run package` | Full release pipeline: icons + profiles + build + pack |
-| `npm run bump <patch\|minor\|major>` | Bump version in package.json + manifest.json, commit + tag |
+| `npm run bump <patch\|minor\|major>` | Bump version in package.json + manifest.json, update CHANGELOG, commit |
 
 ### Stream Deck CLI Commands
 
@@ -244,7 +244,7 @@ npm run bump minor
 npm run bump major
 ```
 
-The script updates both files, appends to `CHANGELOG.md`, and creates a git commit + tag. Push the tag to trigger the automated release workflow.
+The script updates both files, appends a blank entry to `CHANGELOG.md`, and creates a `release:` commit on `dev`. Open a PR to `main` — CI will create the git tag and publish the GitHub Release automatically on merge.
 
 ---
 
