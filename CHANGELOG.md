@@ -10,8 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Comprehensive `README.md` with badges, Mermaid architecture diagram, feature table, rarity chart, project structure tree, and Stream Deck CLI commands reference
 - `CONTRIBUTING.md` documenting branch strategy, Conventional Commits workflow, first-time setup, and full release flow
 - GitHub Actions **CI workflow** (`ci.yml`): type-check, test, and build on every push to `dev` and PRs targeting `main`
-- GitHub Actions **release workflow** (`release.yml`): auto-packages and publishes a GitHub Release with `.streamDeckPlugin` artifact on `v*` tag push
-- Automated version bump script (`npm run bump patch|minor|major`): syncs `package.json` and `manifest.json`, inserts `CHANGELOG.md` entry, commits and tags — one command to release
+- GitHub Actions **release workflow** (`release.yml`): triggers on `release:` commit merging to `main` — creates git tag, builds, packages, and publishes GitHub Release with `.streamDeckPlugin` artifact automatically
+- Automated version bump script (`npm run bump patch|minor|major`): syncs `package.json` and `manifest.json`, inserts `CHANGELOG.md` entry, creates release commit on `dev` — tag is created by CI on `main` after PR merge
 - One-shot branch protection workflow (`setup-branch-protection.yml`): applies full `main` protection rules via GitHub API using a PAT secret
 - `CODEOWNERS` assigning `@SantosMaxime` as default reviewer on all PRs
 - GitHub issue templates for bug reports and feature requests
@@ -25,7 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `dev` established as the default working branch; `main` is protected and accepts PRs only
 
 ### Fixed
-- `bump-version.mjs` push hint corrected to `git push origin dev --follow-tags`
+- `bump-version.mjs` push hint corrected and tag creation removed — git tags are now created by CI on `main`, never pushed manually from `dev`
 - `package.json` and `manifest.json` versions re-synced to `0.1.1` / `0.1.1.0`
 - `.streamDeckPlugin` distributable removed from repository (now produced exclusively by the CI release workflow)
 
