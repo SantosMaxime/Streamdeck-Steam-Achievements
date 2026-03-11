@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
 	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
 	<style>
-		#game-picker-section { margin-top: 4px; }
+		.picker-wrap { padding: 4px 14px 8px; }
 		#game-search {
 			width: 100%;
 			box-sizing: border-box;
@@ -56,24 +56,25 @@
 		}
 		#load-games-btn:hover { background: #3d3d3d; }
 		#load-games-btn:disabled { opacity: 0.5; cursor: default; }
+		.picker-label {
+			font-size: 11px;
+			color: #969696;
+			margin-bottom: 4px;
+		}
 	</style>
 </head>
 <body>
-	<!-- ── Game Browser settings ─────────────────────────────────── -->
-
-	<hr style="border-color: #3a3a3a; margin: 12px 0;" />
-
-	<!-- Game picker -->
-	<sdpi-item label="Pick a game" id="game-picker-section">
-		<div style="width:100%;">
-			<button id="load-games-btn">Load my games</button>
-			<input id="game-search" type="text" placeholder="Search…" style="display:none;" />
-			<div id="game-list-wrap" style="display:none;">
-				<div id="game-status">Press "Load my games" to fetch your library.</div>
-			</div>
+	<!-- ── Game picker (plain DOM — not inside sdpi-item) ────────── -->
+	<div class="picker-wrap">
+		<div class="picker-label">Pick a game</div>
+		<button id="load-games-btn">Load my games</button>
+		<input id="game-search" type="text" placeholder="Search…" style="display:none;" />
+		<div id="game-list-wrap" style="display:none;">
+			<div id="game-status">Press "Load my games" to fetch your library.</div>
 		</div>
-	</sdpi-item>
+	</div>
 
+	<!-- ── Game App ID (manual override) ─────────────────────────── -->
 	<sdpi-item label="Game App ID">
 		<sdpi-textfield
 			setting="appId"
@@ -89,7 +90,7 @@
 			How it works
 		</summary>
 		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
-			<p><strong>Press the key</strong> to load the currently running game's achievements. Or pick a game below to load it immediately.</p>
+			<p><strong>Press the key</strong> to load the currently running game's achievements. Or pick a game above to load it immediately.</p>
 			<p><strong>Load my games:</strong> Fetches your Steam library. Click any game to load its achievements into the grid right away.</p>
 			<p><strong>Game App ID:</strong> Leave empty to auto-detect the running game, or type a specific App ID (the number in store.steampowered.com/app/<strong>440</strong>/).</p>
 			<p>The plugin automatically switches to the correct grid profile for your device.</p>
@@ -97,22 +98,21 @@
 	</details>
 
 	<script>
-		// ── State ─────────────────────────────────────────────
+		const loadBtn     = document.getElementById('load-games-btn');
+		const searchInput = document.getElementById('game-search');
+		const listWrap    = document.getElementById('game-list-wrap');
+		const statusEl    = document.getElementById('game-status');
+
 		let allGames = [];
 		let selectedAppId = null;
 
-		const loadBtn    = document.getElementById('load-games-btn');
-		const searchInput = document.getElementById('game-search');
-		const listWrap   = document.getElementById('game-list-wrap');
-		const statusEl   = document.getElementById('game-status');
-
-		// ── Load current settings to mark selected game ───────
+		// Mark the currently selected game on PI open
 		streamDeckClient.getSettings().then(({ payload }) => {
 			const appId = payload?.settings?.appId;
 			if (appId) selectedAppId = Number(appId);
 		}).catch(() => {});
 
-		// ── Load games button ─────────────────────────────────
+		// ── Load games button ──────────────────────────────────
 		loadBtn.addEventListener('click', () => {
 			loadBtn.disabled = true;
 			loadBtn.textContent = 'Loading…';
@@ -120,12 +120,11 @@
 			listWrap.style.display = 'block';
 			statusEl.style.display = 'block';
 			statusEl.textContent = 'Fetching your library…';
-			// Clear old list items
 			for (const el of listWrap.querySelectorAll('.game-item')) el.remove();
 			streamDeckClient.sendToPlugin({ type: 'requestGames' });
 		});
 
-		// ── Filter game list ──────────────────────────────────
+		// ── Filter game list ───────────────────────────────────
 		searchInput.addEventListener('input', () => {
 			const q = searchInput.value.toLowerCase();
 			for (const el of listWrap.querySelectorAll('.game-item')) {
@@ -133,7 +132,7 @@
 			}
 		});
 
-		// ── Receive messages from plugin ──────────────────────
+		// ── Receive messages from plugin ───────────────────────
 		streamDeckClient.onSendToPropertyInspector(({ payload }) => {
 			if (payload.type === 'games') {
 				allGames = payload.games.sort((a, b) => a.name.localeCompare(b.name));
@@ -141,6 +140,7 @@
 				loadBtn.disabled = false;
 				loadBtn.textContent = `${allGames.length} games loaded`;
 			} else if (payload.type === 'gamesError') {
+				listWrap.style.display = 'block';
 				statusEl.textContent = payload.message ?? 'Error loading games.';
 				statusEl.style.display = 'block';
 				loadBtn.disabled = false;
@@ -149,7 +149,6 @@
 		});
 
 		function renderGameList(games) {
-			// Remove status + old items
 			statusEl.style.display = 'none';
 			for (const el of listWrap.querySelectorAll('.game-item')) el.remove();
 
@@ -172,18 +171,15 @@
 				listWrap.appendChild(div);
 			}
 
-			// Show search only when there are enough games
 			searchInput.style.display = games.length > 10 ? '' : 'none';
 			searchInput.value = '';
 		}
 
 		function selectGame(game) {
 			selectedAppId = game.appid;
-			// Highlight selection
 			for (const el of listWrap.querySelectorAll('.game-item')) {
 				el.classList.toggle('selected', el.dataset.appid === String(game.appid));
 			}
-			// Save the appId setting and immediately load the game into the grid
 			streamDeckClient.getSettings().then(({ payload }) => {
 				const current = payload?.settings ?? {};
 				streamDeckClient.setSettings({ ...current, appId: game.appid });
