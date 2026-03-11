@@ -2,6 +2,32 @@
 
 Thanks for your interest in contributing! This guide will help you get started.
 
+## Branch Strategy
+
+| Branch | Purpose | Direct push? |
+|--------|---------|-------------|
+| `main` | Stable, released code | **No** — PR only |
+| `dev` | Integration branch, daily work | Yes |
+| `feat/*` | Feature branches | Yes (PR to `dev`) |
+| `fix/*` | Bug-fix branches | Yes (PR to `dev`) |
+
+**Rules on `main`:**
+- All merges require a Pull Request from `dev`
+- CI must pass (type-check + tests + build) before merge
+- No force-pushes, no deletion
+
+### First-time repo setup
+
+After cloning and pushing to GitHub for the first time, run the branch protection workflow **once**:
+
+1. Go to **Settings → Secrets and variables → Actions → New repository secret**
+2. Name: `GH_PAT`, Value: a [Personal Access Token](https://github.com/settings/tokens) with `repo` scope
+3. Go to **Actions → Setup Branch Protection → Run workflow**
+
+This locks `main` via the GitHub API. You only need to do this once.
+
+---
+
 ## Development Workflow
 
 1. **Fork** the repository and clone your fork
@@ -87,14 +113,27 @@ When adding a new action or service, add corresponding tests in `src/__tests__/`
 
 ## Releasing
 
-Releases are automated via GitHub Actions. To create a release:
+Releases use a **tag-on-`dev` → PR → merge** flow:
 
 ```bash
+# 1. On dev — bump version, update changelog
 npm run bump patch   # or minor / major
+# CHANGELOG.md now has a blank [x.y.z] entry — fill it in
+git add CHANGELOG.md
+git commit --amend --no-edit
+
+# 2. Push dev + the new tag
 git push origin dev --follow-tags
+
+# 3. Open a PR: dev → main on GitHub
+# CI runs automatically on the PR
+
+# 4. Merge the PR once CI is green
+# The tag is now reachable from main — the Release workflow fires:
+#   → builds, packages, creates GitHub Release with .streamDeckPlugin
 ```
 
-This triggers the release workflow which builds, packages, and publishes a GitHub Release with the `.streamDeckPlugin` artifact.
+The `.streamDeckPlugin` artifact is **never committed** — it's always produced by CI and attached to the GitHub Release automatically.
 
 ## Questions?
 

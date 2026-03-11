@@ -1,0 +1,12 @@
+# CODEOWNERS
+# Assigns default reviewers for all pull requests.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @SantosMaxime
+
+# CI/CD workflows — extra care required
+.github/workflows/ @SantosMaxime
+
+# Plugin manifest — version changes must be intentional
+com.maxik.steam-achievements.sdPlugin/manifest.json @SantosMaxime

@@ -83,4 +83,4 @@ execSync(`git commit -m "release: v${semver}"`, { cwd: root, stdio: "inherit" })
 execSync(`git tag "v${semver}"`, { cwd: root, stdio: "inherit" });
 
 console.log(`\n✔ Committed and tagged v${semver}`);
-console.log(`  Push with: git push origin main --follow-tags`);
+console.log(`  Push with: git push origin dev --follow-tags`);
