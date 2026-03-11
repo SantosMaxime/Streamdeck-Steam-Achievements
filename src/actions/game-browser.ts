@@ -84,8 +84,8 @@ export class GameBrowser extends SingletonAction<GameBrowserSettings> {
 			}
 			const game = await api.getCurrentGame().catch(() => null);
 			if (!game) {
-				await ev.action.showAlert();
-				await ev.action.setTitle("No game\nrunning");
+				// No game running — show the games browser on the grid instead.
+				await this.browseGamesOnGrid(ev.action.device);
 				return;
 			}
 			appId = game.appId;
@@ -128,6 +128,45 @@ export class GameBrowser extends SingletonAction<GameBrowserSettings> {
 			}
 			return;
 		}
+
+		if (deviceInfo?.profile) {
+			try {
+				await streamDeck.profiles.switchToProfile(device.id, deviceInfo.profile);
+			} catch (err) {
+				streamDeck.logger.error(`GameBrowser: switchToProfile failed — ${String(err)}`);
+			}
+		}
+	}
+
+	/** Fetch owned games and put the grid into games-browse mode, then switch to the grid profile. */
+	private async browseGamesOnGrid(device: { id: string; type: number }): Promise<void> {
+		const api = getSteamApi();
+		if (!api) {
+			for (const a of this.actions) await a.showAlert();
+			return;
+		}
+
+		for (const a of this.actions) await a.setTitle("Loading…");
+
+		let games: { appid: number; name: string }[];
+		try {
+			games = await api.getOwnedGames();
+		} catch (err) {
+			streamDeck.logger.error(`GameBrowser: browseGames failed — ${String(err)}`);
+			for (const a of this.actions) {
+				await a.showAlert();
+				await a.setTitle("Load\ngame");
+			}
+			return;
+		}
+
+		const deviceInfo = DEVICE_PROFILE[device.type as number];
+		const pageSize = deviceInfo?.pageSize ?? 10;
+		const grid = getGridController();
+		grid.setPageSize(pageSize);
+		await grid.browseGames(games);
+
+		for (const a of this.actions) await a.setTitle("Games");
 
 		if (deviceInfo?.profile) {
 			try {

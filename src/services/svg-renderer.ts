@@ -235,3 +235,33 @@ export function renderProfileLauncherKey(label: string): string {
 </svg>`;
 	return svgToDataUri(svg);
 }
+
+/**
+ * Game tile — shown when the grid is in "games" mode.
+ * Splits the game name across two lines and shows a teal border.
+ */
+export function renderGameCell(name: string): string {
+	let l1 = name, l2 = "";
+	if (name.length > 13) {
+		const mid = Math.floor(name.length / 2);
+		const split = name.lastIndexOf(" ", mid) > 0 ? name.lastIndexOf(" ", mid) : name.indexOf(" ", mid);
+		if (split > 0) {
+			l1 = name.slice(0, split);
+			l2 = name.slice(split + 1);
+			if (l2.length > 14) l2 = l2.slice(0, 13) + "…";
+		} else {
+			l1 = name.slice(0, 13) + "…";
+		}
+	}
+	if (l1.length > 14) l1 = l1.slice(0, 13) + "…";
+
+	const cy = l2 ? 64 : 72;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
+  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
+  <rect x="2" y="2" width="${SIZE - 4}" height="${SIZE - 4}" fill="none" stroke="#0d9488" stroke-width="2" rx="8"/>
+  <text x="${SIZE / 2}" y="${cy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0">${escapeXml(l1)}</text>
+  ${l2 ? `<text x="${SIZE / 2}" y="${cy + 18}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0">${escapeXml(l2)}</text>` : ""}
+  <text x="${SIZE / 2}" y="130" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#0d9488">CLICK TO LOAD</text>
+</svg>`;
+	return svgToDataUri(svg);
+}

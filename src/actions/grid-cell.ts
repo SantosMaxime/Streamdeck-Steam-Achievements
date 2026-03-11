@@ -29,6 +29,7 @@ import {
 	renderUnlockedCell,
 	renderCelebrationCell,
 	renderEmptyCell,
+	renderGameCell,
 } from "../services/svg-renderer";
 
 type GridCellSettings = {
@@ -126,9 +127,23 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 
 	override async onKeyDown(ev: KeyDownEvent<GridCellSettings>): Promise<void> {
 		const state = this.cells.get(ev.action.id);
-		if (!state?.achievement) return;
+		if (!state) return;
 
 		const grid = getGridController();
+
+		if (grid.getMode() === "games") {
+			const game = grid.getGameSlot(state.slotIndex);
+			if (!game) return;
+			try {
+				await grid.loadGame(game.appid);
+			} catch {
+				await ev.action.showAlert();
+			}
+			return;
+		}
+
+		if (!state.achievement) return;
+
 		const gameName = grid.getGameName() ?? "";
 		const achName = state.achievement.displayName;
 		const clickAction = ev.payload.settings.clickAction ?? "youtube";
@@ -150,6 +165,19 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 
 	private async renderActionSlot(actionObj: ActionLike, state: CellState): Promise<void> {
 		const grid = getGridController();
+
+		if (grid.getMode() === "games") {
+			const game = grid.getGameSlot(state.slotIndex);
+			if (!game) {
+				await actionObj.setImage(renderEmptyCell());
+				await actionObj.setTitle("");
+				return;
+			}
+			await actionObj.setImage(renderGameCell(game.name));
+			await actionObj.setTitle("");
+			return;
+		}
+
 		const achievement = grid.getSlot(state.slotIndex);
 
 		if (!achievement) {
