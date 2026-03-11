@@ -189,6 +189,14 @@ npm run simulate
 
 **⚠️ Important:** The `streamdeck link` command is **required once** before the plugin will appear in Stream Deck. Without it, the plugin exists only in your source code but isn't visible to the app.
 
+**If the plugin is already installed:**
+- If you see `✖️ Plugin already installed: com.maxik.steam-achievements`, first unlink the old version:
+  ```bash
+  streamdeck unlink com.maxik.steam-achievements
+  streamdeck link com.maxik.steam-achievements.sdPlugin
+  ```
+- Or if the plugin is already showing in Stream Deck, just run `npm run watch` directly — it will restart the already-registered plugin automatically.
+
 ### Available Scripts
 
 | Script | Description |
