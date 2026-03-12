@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>Grid Info</title>
+	<title>Grid Info &amp; Config</title>
 	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
 	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
 </head>
@@ -32,6 +32,18 @@
 			<option value="header">Header 460×215 (banner)</option>
 			<option value="library">Library 600×900 (portrait)</option>
 		</sdpi-select>
+	</sdpi-item>
+
+	<sdpi-item label="Cell click action">
+		<sdpi-select setting="clickAction" global>
+			<option value="youtube">Open YouTube guide</option>
+			<option value="steam">Open Steam guides</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="">
+		<span style="color: #969696; font-size: 11px;">
+			What happens when pressing a grid cell (achievements mode). Opens a search on YouTube or Steam guides.
+		</span>
 	</sdpi-item>
 </body>
 </html>

@@ -35,7 +35,6 @@ import {
 type GridCellSettings = {
 	/** Slot index (0-indexed, set in the bundled profile manifest). */
 	slotIndex?: number;
-	clickAction?: "youtube" | "steam";
 };
 
 interface CellState {
@@ -62,6 +61,8 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 	private globalSettingsDisposable?: { dispose: () => void };
 	/** User's preferred game tile image type (from global settings). */
 	private gameTileImage: string = "logo";
+	/** Action to perform when an achievement cell is pressed (from global settings). */
+	private clickAction: string = "youtube";
 
 	override async onWillAppear(ev: WillAppearEvent<GridCellSettings>): Promise<void> {
 		let slot = ev.payload.settings.slotIndex;
@@ -90,6 +91,7 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 				const gs = gsEv.settings as Record<string, unknown>;
 				const version = gs.gridVersion as number | undefined;
 				this.gameTileImage = (gs.gameTileImage as string) || "logo";
+				this.clickAction = (gs.clickAction as string) || "youtube";
 				if (version !== undefined && version !== this.lastVersion) {
 					this.lastVersion = version;
 					for (const a of this.actions) {
@@ -150,7 +152,7 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 
 		const gameName = grid.getGameName() ?? "";
 		const achName = state.achievement.displayName;
-		const clickAction = ev.payload.settings.clickAction ?? "youtube";
+		const clickAction = this.clickAction;
 
 		if (clickAction === "steam" && grid.getAppId()) {
 			const query = encodeURIComponent(achName);

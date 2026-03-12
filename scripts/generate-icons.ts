@@ -8,6 +8,7 @@
  */
 
 import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 import { deflateSync } from "node:zlib";
 
 // ── PNG encoder (pure Node.js) ──────────────────────────────────────────────
@@ -396,6 +397,7 @@ const files: IconSpec[] = [
 for (const f of files) {
 	const c = new Canvas(f.w, f.h);
 	f.draw(c);
+	mkdirSync(dirname(f.path), { recursive: true });
 	writeFileSync(f.path, c.toPng());
 	console.log(`✔ ${f.path}  (${f.w}×${f.h})`);
 }

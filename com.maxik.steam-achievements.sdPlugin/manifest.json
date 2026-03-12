@@ -180,10 +180,10 @@
 			]
 		},
 		{
-			"Name": "Grid: Info",
+			"Name": "Grid: Info & Config",
 			"UUID": "com.maxik.steam-achievements.grid-info",
 			"Icon": "imgs/actions/grid-info/icon",
-			"Tooltip": "Shows game progress ring. Press to cycle sort mode (default, rarest, alphabetical, locked only, unlocked only).",
+			"Tooltip": "Shows game progress ring. Press to switch display or cycle sort. Configure grid-wide settings here.",
 			"PropertyInspectorPath": "ui/grid-info.html",
 			"Controllers": [
 				"Keypad"

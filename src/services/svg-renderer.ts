@@ -3,6 +3,7 @@
  *
  * Generates 144×144 SVG strings (@2x resolution for Stream Deck keys).
  * All SVGs are self-contained data URIs that can be passed to `setImage()`.
+ * No background rects — the Stream Deck software provides the dark background.
  *
  * Rarity color scale:
  *   > 50%   Common        #6b7280 (gray)
@@ -42,54 +43,41 @@ function escapeXml(s: string): string {
 // ── Renderers ──────────────────────────────────────────────
 
 /**
- * Locked achievement cell: embedded image with gray overlay + rarity color strip at the bottom.
+ * Locked achievement cell: dimmed icon + rarity color strip at the bottom.
  */
 export function renderLockedCell(iconBase64: string, rarityPct: number): string {
 	const { color } = getRarityInfo(rarityPct);
-	const stripH = 6;
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  <image href="${escapeXml(iconBase64)}" x="16" y="10" width="112" height="112" opacity="0.5"/>
-  <rect x="0" y="${SIZE - stripH}" width="${SIZE}" height="${stripH}" fill="${color}" rx="0"/>
-  <rect x="0" y="0" width="${SIZE}" height="${SIZE}" fill="none" stroke="#333" stroke-width="2" rx="8"/>
+  <image href="${escapeXml(iconBase64)}" x="12" y="8" width="120" height="120" opacity="0.4"/>
+  <rect x="0" y="138" width="${SIZE}" height="6" fill="${color}"/>
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
- * Unlocked achievement cell: full-color image + rarity border glow.
+ * Unlocked achievement cell: full-color icon + rarity color strip at the bottom.
  */
 export function renderUnlockedCell(iconBase64: string, rarityPct: number): string {
 	const { color } = getRarityInfo(rarityPct);
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <defs>
-    <filter id="glow">
-      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="${color}" flood-opacity="0.8"/>
-    </filter>
-  </defs>
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  <image href="${escapeXml(iconBase64)}" x="16" y="10" width="112" height="112"/>
-  <rect x="2" y="2" width="${SIZE - 4}" height="${SIZE - 4}" fill="none" stroke="${color}" stroke-width="3" rx="8" filter="url(#glow)"/>
+  <image href="${escapeXml(iconBase64)}" x="12" y="8" width="120" height="120"/>
+  <rect x="0" y="138" width="${SIZE}" height="6" fill="${color}"/>
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
- * Celebration frame — golden glow that alternates intensity (frame 0 or 1).
+ * Celebration frame — golden pulsing border (frame 0 or 1).
  */
 export function renderCelebrationCell(iconBase64: string, frame: 0 | 1): string {
-	const glowSize = frame === 0 ? 4 : 7;
-	const opacity = frame === 0 ? "0.8" : "1";
+	const glowSize = frame === 0 ? 4 : 8;
+	const borderW = frame === 0 ? 3 : 5;
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
   <defs>
-    <filter id="celebglow">
-      <feDropShadow dx="0" dy="0" stdDeviation="${glowSize}" flood-color="#f59e0b" flood-opacity="${opacity}"/>
-    </filter>
+    <filter id="glow"><feDropShadow dx="0" dy="0" stdDeviation="${glowSize}" flood-color="#f59e0b" flood-opacity="1"/></filter>
   </defs>
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  <image href="${escapeXml(iconBase64)}" x="16" y="10" width="112" height="112" filter="url(#celebglow)"/>
-  <rect x="2" y="2" width="${SIZE - 4}" height="${SIZE - 4}" fill="none" stroke="#f59e0b" stroke-width="3" rx="8" filter="url(#celebglow)"/>
-  <text x="${SIZE / 2}" y="${SIZE - 8}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#f59e0b">🏆 UNLOCKED</text>
+  <image href="${escapeXml(iconBase64)}" x="12" y="8" width="120" height="120"/>
+  <rect x="2" y="2" width="${SIZE - 4}" height="${SIZE - 4}" fill="none" stroke="#f59e0b" stroke-width="${borderW}" filter="url(#glow)"/>
 </svg>`;
 	return svgToDataUri(svg);
 }
@@ -97,38 +85,30 @@ export function renderCelebrationCell(iconBase64: string, frame: 0 | 1): string 
 /**
  * Circular progress ring for Grid Info display.
  */
-export function renderProgressRing(pct: number, gameImageBase64?: string): string {
+export function renderProgressRing(pct: number): string {
 	const cx = SIZE / 2;
 	const cy = SIZE / 2;
-	const r = 50;
+	const r = 52;
 	const circumference = 2 * Math.PI * r;
 	const offset = circumference * (1 - pct / 100);
-
 	const color = pct === 100 ? "#f59e0b" : pct >= 75 ? "#22c55e" : pct >= 50 ? "#3b82f6" : "#6b7280";
 
-	const gameImg = gameImageBase64
-		? `<image href="${escapeXml(gameImageBase64)}" x="32" y="32" width="80" height="80" clip-path="circle(36px at 40px 40px)" opacity="0.3"/>`
-		: "";
-
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  ${gameImg}
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#333" stroke-width="8"/>
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8"
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#2a2a2a" stroke-width="9"/>
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="9"
     stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
     stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
-  <text x="${cx}" y="${cy + 6}" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="white">${pct}%</text>
+  <text x="${cx}" y="${cy + 9}" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="white">${pct}%</text>
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
- * Empty slot placeholder.
+ * Empty slot placeholder — minimal dashed outline.
  */
 export function renderEmptyCell(): string {
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#0f0f1a" rx="8"/>
-  <rect x="4" y="4" width="${SIZE - 8}" height="${SIZE - 8}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="8 4" rx="6"/>
+  <rect x="6" y="6" width="${SIZE - 12}" height="${SIZE - 12}" fill="none" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="6 4" rx="4"/>
 </svg>`;
 	return svgToDataUri(svg);
 }
@@ -140,67 +120,55 @@ export function renderNavButton(type: "prev" | "next" | "back"): string {
 	let inner: string;
 
 	if (type === "prev") {
-		// Left chevron
-		inner = `<polygon points="90,30 50,72 90,114" fill="#ccc"/>`;
+		inner = `<polyline points="88,30 48,72 88,114" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`;
 	} else if (type === "next") {
-		// Right chevron
-		inner = `<polygon points="54,30 94,72 54,114" fill="#ccc"/>`;
+		inner = `<polyline points="56,30 96,72 56,114" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`;
 	} else {
-		// Back arrow (home icon)
-		inner = `
-    <polygon points="72,28 28,72 50,72 50,116 94,116 94,72 116,72" fill="none" stroke="#ccc" stroke-width="4" stroke-linejoin="round"/>
-    <rect x="62" y="88" width="20" height="28" fill="#ccc" rx="2"/>`;
+		inner = `<path d="M24,74 L72,26 L120,74 M42,74 L42,118 L102,118 L102,74" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
 	}
 
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
   ${inner}
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
- * Game browser button — controller icon.
+ * Load Game button — controller icon in white.
  */
 export function renderGameBrowserKey(): string {
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  <rect x="24" y="40" width="96" height="64" rx="12" fill="none" stroke="#3b82f6" stroke-width="3"/>
-  <circle cx="52" cy="72" r="8" fill="#3b82f6"/>
-  <line x1="84" y1="60" x2="84" y2="84" stroke="#3b82f6" stroke-width="3"/>
-  <line x1="72" y1="72" x2="96" y2="72" stroke="#3b82f6" stroke-width="3"/>
-  <text x="${SIZE / 2}" y="126" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#888">GAMES</text>
+  <rect x="20" y="44" width="104" height="62" rx="14" fill="none" stroke="white" stroke-width="5"/>
+  <circle cx="50" cy="72" r="8" fill="white"/>
+  <line x1="90" y1="59" x2="90" y2="85" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <line x1="77" y1="72" x2="103" y2="72" stroke="white" stroke-width="5" stroke-linecap="round"/>
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
- * Daily pick — star icon.
+ * Daily pick — gold star.
  */
 export function renderDailyPickKey(): string {
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  <polygon points="72,20 84,56 122,56 90,78 102,114 72,92 42,114 54,78 22,56 60,56"
-    fill="#f59e0b" stroke="#f59e0b" stroke-width="1"/>
-  <text x="${SIZE / 2}" y="138" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#888">DAILY PICK</text>
+  <polygon points="72,16 85,54 124,54 93,77 105,114 72,91 39,114 51,77 20,54 59,54" fill="#f59e0b"/>
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
- * Settings key — gear icon with status text.
+ * Settings key — gear icon with status color.
  * state: "configured" (green), "unconfigured" (gray), "testing" (amber), "error" (red)
  */
 export function renderSettingsKey(state: "configured" | "unconfigured" | "testing" | "error"): string {
 	const colors = {
-		configured:   { ring: "#22c55e", text: "#22c55e", label: "Configured ✓" },
-		unconfigured: { ring: "#6b7280", text: "#6b7280", label: "Not Configured" },
+		configured:   { ring: "#22c55e", text: "#22c55e", label: "Configured" },
+		unconfigured: { ring: "#6b7280", text: "#6b7280", label: "Not set up" },
 		testing:      { ring: "#f59e0b", text: "#f59e0b", label: "Testing…" },
 		error:        { ring: "#ef4444", text: "#ef4444", label: "Error" },
 	};
 	const { ring, text, label } = colors[state];
-	const cx = SIZE / 2, cy = 58;
-	// Gear teeth: 8 rectangular prongs around the ring
+	const cx = SIZE / 2, cy = 56;
 	const teeth = Array.from({ length: 8 }, (_, i) => {
 		const a = (i / 8) * Math.PI * 2;
 		const a1 = a - 0.18, a2 = a + 0.18;
@@ -212,40 +180,35 @@ export function renderSettingsKey(state: "configured" | "unconfigured" | "testin
 			`A${ri},${ri},0,0,0,${cx + Math.cos(a1) * ri},${cy + Math.sin(a1) * ri}Z`;
 	}).join(" ");
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
   <circle cx="${cx}" cy="${cy}" r="22" fill="none" stroke="${ring}" stroke-width="5"/>
   <circle cx="${cx}" cy="${cy}" r="9" fill="${ring}"/>
   <path d="${escapeXml(teeth)}" fill="${ring}"/>
-  <text x="${cx}" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="${text}">${escapeXml(label)}</text>
+  <text x="${cx}" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="${text}">${escapeXml(label)}</text>
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
- * Profile launcher key — two overlapping pages with a right-arrow to indicate switching.
+ * Profile launcher key — stacked pages with an arrow, in white.
  */
 export function renderProfileLauncherKey(label: string): string {
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  <rect x="28" y="30" width="64" height="72" rx="6" fill="none" stroke="#22c55e" stroke-width="2" opacity="0.5"/>
-  <rect x="44" y="22" width="64" height="72" rx="6" fill="#1a1a2e" stroke="#22c55e" stroke-width="3"/>
-  <line x1="58" y1="58" x2="88" y2="58" stroke="#22c55e" stroke-width="4" stroke-linecap="round"/>
-  <polygon points="84,50 96,58 84,66" fill="#22c55e"/>
-  <text x="${SIZE / 2 + 4}" y="114" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#22c55e">${escapeXml(label)}</text>
+  <rect x="28" y="30" width="62" height="70" rx="5" fill="none" stroke="white" stroke-width="3" opacity="0.35"/>
+  <rect x="44" y="22" width="62" height="70" rx="5" fill="none" stroke="white" stroke-width="4"/>
+  <line x1="58" y1="58" x2="90" y2="58" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <polyline points="82,48 94,58 82,68" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="${SIZE / 2 + 4}" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="white">${escapeXml(label)}</text>
 </svg>`;
 	return svgToDataUri(svg);
 }
 
 /**
  * Game tile — shown when the grid is in "games" mode.
- * Displays Steam game logo or capsule image when available:
- *   xMidYMid meet → full image shown without distortion or deformation.
- * Falls back to splitting the game name across two lines with a teal border.
+ * Displays Steam game image when available, falls back to white text.
  */
 export function renderGameCell(name: string, imageDataUri: string | null = null): string {
 	if (imageDataUri) {
 		const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#0d0d0d"/>
   <image href="${imageDataUri}" x="0" y="0" width="${SIZE}" height="${SIZE}" preserveAspectRatio="xMidYMid meet"/>
 </svg>`;
 		return svgToDataUri(svg);
@@ -267,10 +230,8 @@ export function renderGameCell(name: string, imageDataUri: string | null = null)
 
 	const cy = l2 ? 64 : 72;
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <rect width="${SIZE}" height="${SIZE}" fill="#1a1a2e" rx="8"/>
-  <rect x="2" y="2" width="${SIZE - 4}" height="${SIZE - 4}" fill="none" stroke="#0d9488" stroke-width="2" rx="8"/>
-  <text x="${SIZE / 2}" y="${cy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0">${escapeXml(l1)}</text>
-  ${l2 ? `<text x="${SIZE / 2}" y="${cy + 18}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0">${escapeXml(l2)}</text>` : ""}
+  <text x="${SIZE / 2}" y="${cy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="white">${escapeXml(l1)}</text>
+  ${l2 ? `<text x="${SIZE / 2}" y="${cy + 18}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="white">${escapeXml(l2)}</text>` : ""}
 </svg>`;
 	return svgToDataUri(svg);
 }

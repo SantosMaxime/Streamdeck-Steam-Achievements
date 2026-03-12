@@ -26,15 +26,16 @@ function makeAction(uuid, name, settings = null) {
 	};
 }
 
-const CELL  = "com.maxik.steam-achievements.grid-cell";
-const PREV  = "com.maxik.steam-achievements.grid-prev";
-const NEXT  = "com.maxik.steam-achievements.grid-next";
-const BACK  = "com.maxik.steam-achievements.grid-back";
-const INFO  = "com.maxik.steam-achievements.grid-info";
-const BROWS = "com.maxik.steam-achievements.game-browser";
+const CELL   = "com.maxik.steam-achievements.grid-cell";
+const PREV   = "com.maxik.steam-achievements.grid-prev";
+const NEXT   = "com.maxik.steam-achievements.grid-next";
+const ROTATE = "com.elgato.streamdeck.profile.rotate";
+const INFO   = "com.maxik.steam-achievements.grid-info";
+const BROWS  = "com.maxik.steam-achievements.game-browser";
 
 const cell = (slot) => makeAction(CELL, "Achievement", { slotIndex: slot });
 const nav  = (uuid, n) => makeAction(uuid, n);
+const back = () => makeAction(ROTATE, "Changer de profil", { DeviceUUID: "", PageIndex: 1, ProfileUUID: "" });
 
 // ── Profile definitions ───────────────────────────────────
 
@@ -46,7 +47,7 @@ const profiles = [
 		actions: {
 			"0,0": cell(0), "1,0": cell(1), "2,0": cell(2), "3,0": cell(3), "4,0": cell(4),
 			"0,1": cell(5), "1,1": cell(6), "2,1": cell(7), "3,1": cell(8), "4,1": cell(9),
-			"0,2": nav(BACK,  "Grid Back"),
+			"0,2": back(),
 			"1,2": nav(PREV,  "Grid Prev"),
 			"2,2": nav(INFO,  "Grid Info"),
 			"3,2": nav(NEXT,  "Grid Next"),
@@ -59,7 +60,7 @@ const profiles = [
 		uuid:        "B2C3D4E5-F6A7-8901-BCDE-F12345678901",
 		actions: {
 			"0,0": cell(0), "1,0": cell(1), "2,0": cell(2),
-			"0,1": nav(BACK, "Grid Back"),
+			"0,1": back(),
 			"1,1": nav(INFO, "Grid Info"),
 			"2,1": nav(NEXT, "Grid Next"),
 		},
@@ -72,7 +73,7 @@ const profiles = [
 			...Object.fromEntries(
 				Array.from({ length: 24 }, (_, i) => [`${i % 8},${Math.floor(i / 8)}`, cell(i)])
 			),
-			"0,3": nav(BACK,  "Grid Back"),
+			"0,3": back(),
 			"1,3": nav(PREV,  "Grid Prev"),
 			"4,3": nav(INFO,  "Grid Info"),
 			"6,3": nav(NEXT,  "Grid Next"),
@@ -85,7 +86,7 @@ const profiles = [
 		uuid:        "D4E5F6A7-B8C9-0123-DEF0-234567890123",
 		actions: {
 			"0,0": cell(0), "1,0": cell(1), "2,0": cell(2), "3,0": cell(3),
-			"0,1": nav(BACK, "Grid Back"),
+			"0,1": back(),
 			"1,1": nav(PREV, "Grid Prev"),
 			"2,1": nav(INFO, "Grid Info"),
 			"3,1": nav(NEXT, "Grid Next"),

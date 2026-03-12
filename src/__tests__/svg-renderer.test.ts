@@ -94,11 +94,6 @@ describe("renderLockedCell", () => {
 		expect(svg).toContain("AAAA");
 	});
 
-	it("has a gray border stroke", () => {
-		const svg = decodeSvgDataUri(result);
-		expect(svg).toContain('stroke="#333"');
-	});
-
 	it("has the rarity color strip at the bottom", () => {
 		const svg = decodeSvgDataUri(result);
 		// 10% => Rare => blue
@@ -107,7 +102,7 @@ describe("renderLockedCell", () => {
 
 	it("renders the icon with reduced opacity (locked look)", () => {
 		const svg = decodeSvgDataUri(result);
-		expect(svg).toContain('opacity="0.5"');
+		expect(svg).toContain('opacity="0.4"');
 	});
 });
 
@@ -121,23 +116,16 @@ describe("renderUnlockedCell", () => {
 		expect(result).toMatch(/^data:image\/svg\+xml;/);
 	});
 
-	it("contains the glow filter definition", () => {
-		const svg = decodeSvgDataUri(result);
-		expect(svg).toContain('<filter id="glow">');
-		expect(svg).toContain("feDropShadow");
-	});
-
 	it("contains the icon reference at full opacity", () => {
 		const svg = decodeSvgDataUri(result);
 		expect(svg).toContain("BBBB");
-		// Should NOT have opacity="0.5" like the locked cell
-		expect(svg).not.toContain('opacity="0.5"');
+		expect(svg).not.toContain('opacity="0.4"');
 	});
 
-	it("uses the rarity color for the border stroke", () => {
+	it("uses the rarity color for the bottom strip", () => {
 		const svg = decodeSvgDataUri(result);
 		// 0.5% => Legendary => gold
-		expect(svg).toContain('stroke="#f59e0b"');
+		expect(svg).toContain('fill="#f59e0b"');
 	});
 });
 
@@ -159,20 +147,15 @@ describe("renderCelebrationCell", () => {
 		expect(svg).toContain('stdDeviation="4"');
 	});
 
-	it("frame 1 has a larger glow size (stdDeviation=7)", () => {
+	it("frame 1 has a larger glow size (stdDeviation=8)", () => {
 		const svg = decodeSvgDataUri(renderCelebrationCell(icon, 1));
-		expect(svg).toContain('stdDeviation="7"');
+		expect(svg).toContain('stdDeviation="8"');
 	});
 
 	it("frame 0 and frame 1 produce different SVGs", () => {
 		const svg0 = decodeSvgDataUri(renderCelebrationCell(icon, 0));
 		const svg1 = decodeSvgDataUri(renderCelebrationCell(icon, 1));
 		expect(svg0).not.toBe(svg1);
-	});
-
-	it("contains the UNLOCKED text", () => {
-		const svg = decodeSvgDataUri(renderCelebrationCell(icon, 0));
-		expect(svg).toContain("UNLOCKED");
 	});
 });
 
@@ -218,17 +201,8 @@ describe("renderProgressRing", () => {
 		expect(svg).toContain('stroke="#6b7280"');
 	});
 
-	it("includes a game image when base64 is provided", () => {
-		const svg = decodeSvgDataUri(
-			renderProgressRing(50, "data:image/png;base64,GAME"),
-		);
-		expect(svg).toContain("GAME");
-		expect(svg).toContain("<image");
-	});
-
-	it("omits the game image when not provided", () => {
+	it("contains no image element", () => {
 		const svg = decodeSvgDataUri(renderProgressRing(50));
-		// There should still be no <image> element (only circles and text)
 		expect(svg).not.toContain("<image");
 	});
 });
@@ -264,9 +238,9 @@ describe("renderNavButton", () => {
 			expect(result).toMatch(/^data:image\/svg\+xml;/);
 		});
 
-		it("contains a polygon (left chevron)", () => {
+		it("contains a polyline (left chevron)", () => {
 			const svg = decodeSvgDataUri(result);
-			expect(svg).toContain("<polygon");
+			expect(svg).toContain("<polyline");
 		});
 	});
 
@@ -277,9 +251,9 @@ describe("renderNavButton", () => {
 			expect(result).toMatch(/^data:image\/svg\+xml;/);
 		});
 
-		it("contains a polygon (right chevron)", () => {
+		it("contains a polyline (right chevron)", () => {
 			const svg = decodeSvgDataUri(result);
-			expect(svg).toContain("<polygon");
+			expect(svg).toContain("<polyline");
 		});
 	});
 
@@ -290,10 +264,9 @@ describe("renderNavButton", () => {
 			expect(result).toMatch(/^data:image\/svg\+xml;/);
 		});
 
-		it("contains a polygon and rect (home icon)", () => {
+		it("contains a path (home icon)", () => {
 			const svg = decodeSvgDataUri(result);
-			expect(svg).toContain("<polygon");
-			expect(svg).toContain("<rect");
+			expect(svg).toContain("<path");
 		});
 	});
 
@@ -316,11 +289,6 @@ describe("renderGameBrowserKey", () => {
 		expect(result).toMatch(/^data:image\/svg\+xml;/);
 	});
 
-	it("contains the GAMES label", () => {
-		const svg = decodeSvgDataUri(result);
-		expect(svg).toContain("GAMES");
-	});
-
 	it("contains controller icon elements", () => {
 		const svg = decodeSvgDataUri(result);
 		expect(svg).toContain("<circle");
@@ -335,11 +303,6 @@ describe("renderDailyPickKey", () => {
 
 	it("returns a valid SVG data URI", () => {
 		expect(result).toMatch(/^data:image\/svg\+xml;/);
-	});
-
-	it("contains the DAILY PICK label", () => {
-		const svg = decodeSvgDataUri(result);
-		expect(svg).toContain("DAILY PICK");
 	});
 
 	it("contains a star polygon", () => {
