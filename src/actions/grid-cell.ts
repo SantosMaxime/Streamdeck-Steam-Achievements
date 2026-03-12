@@ -6,7 +6,9 @@
  * when a singleton shares a single `mySlot` value across all key instances.
  *
  * Slot index is stored in the action's bundled settings (set by the profile
- * manifest) or falls back to 0.
+ * manifest). If unset — e.g. when a user manually adds a new grid cell —
+ * the slot is auto-calculated from the key's physical position on the deck
+ * and saved back so it persists.
  *
  * Press → opens a YouTube or Steam guide for the displayed achievement.
  */
@@ -21,17 +23,18 @@ import streamDeck, {
 } from "@elgato/streamdeck";
 import { getGridController, type GridAchievement } from "../services/grid-controller";
 import { getSteamApi } from "../services/steam-client-holder";
+import { DEVICE_PROFILE } from "../services/device-profiles";
 import {
 	renderLockedCell,
 	renderUnlockedCell,
 	renderCelebrationCell,
 	renderEmptyCell,
+	renderGameCell,
 } from "../services/svg-renderer";
 
 type GridCellSettings = {
 	/** Slot index (0-indexed, set in the bundled profile manifest). */
 	slotIndex?: number;
-	clickAction?: "youtube" | "steam";
 };
 
 interface CellState {
@@ -56,11 +59,27 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 	private lastVersion = -1;
 	/** Single subscription for all grid cells on this device. */
 	private globalSettingsDisposable?: { dispose: () => void };
+	/** User's preferred game tile image type (from global settings). */
+	private gameTileImage: string = "logo";
+	/** Action to perform when an achievement cell is pressed (from global settings). */
+	private clickAction: string = "youtube";
 
 	override async onWillAppear(ev: WillAppearEvent<GridCellSettings>): Promise<void> {
-		const slot = ev.payload.settings.slotIndex ?? 0;
+		let slot = ev.payload.settings.slotIndex;
+
+		// If slotIndex is not set (e.g. user manually added a new grid cell),
+		// calculate it from the physical key position on the deck.
+		if (slot === undefined || slot === null) {
+			const coords = "coordinates" in ev.payload ? ev.payload.coordinates : undefined;
+			const deviceType = ev.action.device.type as number;
+			const cols = DEVICE_PROFILE[deviceType]?.cols ?? 5;
+			slot = coords ? coords.row * cols + coords.column : 0;
+			// Persist the calculated value so it sticks
+			await ev.action.setSettings({ ...ev.payload.settings, slotIndex: slot });
+		}
+
 		this.cells.set(ev.action.id, {
-			slotIndex: slot,
+			slotIndex: slot ?? 0,
 			achievement: null,
 			celebrationFrame: 0,
 			celebrationIconBase64: null,
@@ -71,6 +90,8 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 			this.globalSettingsDisposable = streamDeck.settings.onDidReceiveGlobalSettings((gsEv) => {
 				const gs = gsEv.settings as Record<string, unknown>;
 				const version = gs.gridVersion as number | undefined;
+				this.gameTileImage = (gs.gameTileImage as string) || "logo";
+				this.clickAction = (gs.clickAction as string) || "youtube";
 				if (version !== undefined && version !== this.lastVersion) {
 					this.lastVersion = version;
 					for (const a of this.actions) {
@@ -87,6 +108,7 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 	override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<GridCellSettings>): Promise<void> {
 		const state = this.cells.get(ev.action.id);
 		if (!state) return;
+
 		const newSlot = ev.payload.settings.slotIndex ?? 0;
 		if (newSlot !== state.slotIndex) {
 			state.slotIndex = newSlot;
@@ -111,12 +133,26 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 
 	override async onKeyDown(ev: KeyDownEvent<GridCellSettings>): Promise<void> {
 		const state = this.cells.get(ev.action.id);
-		if (!state?.achievement) return;
+		if (!state) return;
 
 		const grid = getGridController();
+
+		if (grid.getMode() === "games") {
+			const game = grid.getGameSlot(state.slotIndex);
+			if (!game) return;
+			try {
+				await grid.loadGame(game.appid);
+			} catch {
+				await ev.action.showAlert();
+			}
+			return;
+		}
+
+		if (!state.achievement) return;
+
 		const gameName = grid.getGameName() ?? "";
 		const achName = state.achievement.displayName;
-		const clickAction = ev.payload.settings.clickAction ?? "youtube";
+		const clickAction = this.clickAction;
 
 		if (clickAction === "steam" && grid.getAppId()) {
 			const query = encodeURIComponent(achName);
@@ -135,6 +171,31 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 
 	private async renderActionSlot(actionObj: ActionLike, state: CellState): Promise<void> {
 		const grid = getGridController();
+
+		if (grid.getMode() === "games") {
+			const game = grid.getGameSlot(state.slotIndex);
+			if (!game) {
+				await actionObj.setImage(renderEmptyCell());
+				await actionObj.setTitle("");
+				return;
+			}
+			const api = getSteamApi();
+			let imageDataUri: string | null = null;
+
+			if (api) {
+				// Get URLs to try based on user's chosen image type
+				const urlsToTry = this.getImageUrlsForType(game.appid, this.gameTileImage);
+				for (const url of urlsToTry) {
+					imageDataUri = await api.fetchImageAsDataUri(url).catch(() => null);
+					if (imageDataUri) break; // Stop at first successful fetch
+				}
+			}
+
+			await actionObj.setImage(renderGameCell(game.name, imageDataUri));
+			await actionObj.setTitle("");
+			return;
+		}
+
 		const achievement = grid.getSlot(state.slotIndex);
 
 		if (!achievement) {
@@ -203,6 +264,55 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 		if (state.celebrationTimer) {
 			clearInterval(state.celebrationTimer);
 			state.celebrationTimer = undefined;
+		}
+	}
+
+	/** Get Steam CDN URLs to try for game images, ordered by preference. */
+	private getImageUrlsForType(appid: number, type: string): string[] {
+		const base = `https://cdn.akamai.steamstatic.com/steam/apps/${appid}`;
+
+		switch (type) {
+			case "logo":
+				return [
+					`${base}/logo.png`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/capsule_231x87.jpg`,
+				];
+			case "capsule_sm":
+				return [
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+					`${base}/capsule_231x87.jpg`,
+				];
+			case "icon":
+				return [
+					`${base}/icon_256x256.jpg`,
+					`${base}/icon_64x64.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+				];
+			case "capsule_lg":
+				return [
+					`${base}/capsule_231x87.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+				];
+			case "header":
+				return [
+					`${base}/header.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+				];
+			case "library":
+				return [
+					`${base}/library_600x900.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+				];
+			default:
+				return [
+					`${base}/logo.png`,
+					`${base}/capsule_sm_120.jpg`,
+				];
 		}
 	}
 }

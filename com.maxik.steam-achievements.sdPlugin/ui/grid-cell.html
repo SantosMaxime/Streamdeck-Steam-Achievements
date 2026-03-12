@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Grid Cell</title>
+	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
+	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
+</head>
+<body>
+	<sdpi-item label="Slot Index">
+		<sdpi-textfield
+			setting="slotIndex"
+			type="number"
+			placeholder="Auto"
+			min="0"
+			max="99"
+		></sdpi-textfield>
+	</sdpi-item>
+	<sdpi-item label="">
+		<span style="color: #969696; font-size: 11px;">
+			Leave as <strong>Auto</strong> for automatic ordering based on physical key position.
+			Set a number (0-based) to pin this cell to a specific achievement slot.
+		</span>
+	</sdpi-item>
+</body>
+</html>

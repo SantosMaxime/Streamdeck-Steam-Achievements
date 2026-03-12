@@ -8,6 +8,7 @@
  */
 
 import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 import { deflateSync } from "node:zlib";
 
 // ── PNG encoder (pure Node.js) ──────────────────────────────────────────────
@@ -285,6 +286,64 @@ function starPoints(cx: number, cy: number, outerR: number, innerR: number): [nu
 	return pts;
 }
 
+/** Settings: gear icon with a center hole */
+function drawSettingsIcon(c: Canvas): void {
+	const [R, G, B] = [34, 197, 94]; // green — matches status feedback color
+	const cx = c.w / 2 - 0.5, cy = c.h / 2 - 0.5;
+	const outer = s(c, 0.42), inner = s(c, 0.27), hole = s(c, 0.13);
+
+	// Draw 8 gear teeth
+	for (let i = 0; i < 8; i++) {
+		const a = (i / 8) * Math.PI * 2;
+		const a1 = a - 0.25, a2 = a + 0.25;
+		c.fillPoly([
+			[cx + Math.cos(a1) * inner, cy + Math.sin(a1) * inner],
+			[cx + Math.cos(a1) * outer, cy + Math.sin(a1) * outer],
+			[cx + Math.cos(a2) * outer, cy + Math.sin(a2) * outer],
+			[cx + Math.cos(a2) * inner, cy + Math.sin(a2) * inner],
+		], R, G, B);
+	}
+
+	// Gear body ring
+	c.drawRing(cx, cy, inner, hole, R, G, B);
+
+	// Center hole (transparent — draws background color)
+	c.fillCircle(cx, cy, hole, 27, 40, 56);
+}
+
+/** Profile Launcher: two overlapping rectangles with a forward arrow */
+function drawProfileLauncherIcon(c: Canvas): void {
+	const [R, G, B] = [34, 197, 94]; // green
+	const cx = c.w / 2 - 0.5, cy = c.h / 2 - 0.5;
+
+	// Back page (offset slightly up-left)
+	const pw = s(c, 0.5), ph = s(c, 0.62);
+	const bx = cx - pw * 0.65, by = cy - ph * 0.35;
+	for (let dy = 0; dy < Math.round(ph); dy++) {
+		for (let dx = 0; dx < Math.round(pw); dx++) {
+			c.setPixel(Math.round(bx + dx), Math.round(by + dy), R, G, B, 80);
+		}
+	}
+
+	// Front page
+	const fx = cx - pw * 0.2, fy = cy - ph * 0.65;
+	for (let dy = 0; dy < Math.round(ph); dy++) {
+		for (let dx = 0; dx < Math.round(pw); dx++) {
+			c.setPixel(Math.round(fx + dx), Math.round(fy + dy), R, G, B, 220);
+		}
+	}
+
+	// Arrow pointing right (→) on front page
+	const ax = Math.round(fx + pw * 0.35), ay = Math.round(fy + ph * 0.5);
+	const ah = Math.max(1, Math.round(s(c, 0.06)));
+	c.fillRect(Math.round(ax - s(c, 0.14)), ay - ah, Math.round(s(c, 0.18)), ah * 2, 27, 40, 56, 255);
+	c.fillPoly([
+		[ax, ay - s(c, 0.12)],
+		[ax + s(c, 0.14), ay],
+		[ax, ay + s(c, 0.12)],
+	], 27, 40, 56, 255);
+}
+
 // ── File list ────────────────────────────────────────────────────────────────
 
 const SD = "com.maxik.steam-achievements.sdPlugin";
@@ -327,11 +386,18 @@ const files: IconSpec[] = [
 
 	...icon("imgs/actions/daily-pick/icon",            20,  20,  drawDailyPickIcon),
 	...icon("imgs/actions/daily-pick/key",             72,  72,  drawDailyPickIcon),
+
+	...icon("imgs/actions/settings/icon",              20,  20,  drawSettingsIcon),
+	...icon("imgs/actions/settings/key",               72,  72,  drawSettingsIcon),
+
+	...icon("imgs/actions/profile-launcher/icon",      20,  20,  drawProfileLauncherIcon),
+	...icon("imgs/actions/profile-launcher/key",       72,  72,  drawProfileLauncherIcon),
 ];
 
 for (const f of files) {
 	const c = new Canvas(f.w, f.h);
 	f.draw(c);
+	mkdirSync(dirname(f.path), { recursive: true });
 	writeFileSync(f.path, c.toPng());
 	console.log(`✔ ${f.path}  (${f.w}×${f.h})`);
 }

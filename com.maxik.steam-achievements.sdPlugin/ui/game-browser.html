@@ -2,11 +2,32 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>Game Browser - Settings</title>
+	<title>Load Game - Settings</title>
 	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
 	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
 	<style>
-		#game-picker-section { margin-top: 4px; }
+		.section { padding: 4px 14px 8px; }
+		.section-label {
+			font-size: 11px;
+			color: #969696;
+			margin-bottom: 4px;
+		}
+		.btn {
+			width: 100%;
+			box-sizing: border-box;
+			background: #2d2d2d;
+			border: 1px solid #3a3a3a;
+			color: #c8c8c8;
+			padding: 6px 10px;
+			border-radius: 3px;
+			font-size: 12px;
+			cursor: pointer;
+			margin-bottom: 6px;
+		}
+		.btn:hover { background: #3d3d3d; }
+		.btn:disabled { opacity: 0.5; cursor: default; }
+		.btn-primary { border-color: #0d9488; color: #5eead4; }
+		.btn-primary:hover { background: #1a2e2b; }
 		#game-search {
 			width: 100%;
 			box-sizing: border-box;
@@ -20,7 +41,7 @@
 		}
 		#game-search:focus { outline: none; border-color: #5a5a5a; }
 		#game-list-wrap {
-			height: 140px;
+			height: 120px;
 			overflow-y: auto;
 			background: #1e1e1e;
 			border: 1px solid #3a3a3a;
@@ -44,65 +65,18 @@
 			color: #969696;
 			padding: 4px 8px;
 		}
-		#load-games-btn {
-			background: #2d2d2d;
-			border: 1px solid #3a3a3a;
-			color: #c8c8c8;
-			padding: 4px 10px;
-			border-radius: 3px;
-			font-size: 11px;
-			cursor: pointer;
-			margin-bottom: 6px;
-		}
-		#load-games-btn:hover { background: #3d3d3d; }
-		#load-games-btn:disabled { opacity: 0.5; cursor: default; }
 	</style>
 </head>
 <body>
-	<!-- ── Global settings (shared with all actions) ────────────── -->
+	<!-- ── Browse library on grid ─────────────────────────────── -->
+	<div class="section">
+		<div class="section-label">Browse games</div>
+		<button id="browse-grid-btn" class="btn btn-primary">Browse library on grid</button>
+	</div>
 
-	<sdpi-item label="Steam API Key">
-		<sdpi-textfield
-			setting="apiKey"
-			global
-			type="password"
-			placeholder="Enter your Steam Web API key"
-			required
-		></sdpi-textfield>
-	</sdpi-item>
+	<hr style="border-color: #3a3a3a; margin: 4px 0;" />
 
-	<sdpi-item label="Get your key">
-		<sdpi-link url="https://steamcommunity.com/dev/apikey">steamcommunity.com/dev/apikey</sdpi-link>
-	</sdpi-item>
-
-	<sdpi-item label="Steam ID (64-bit)">
-		<sdpi-textfield
-			setting="steamId"
-			global
-			placeholder="e.g. 76561198012345678"
-			required
-		></sdpi-textfield>
-	</sdpi-item>
-
-	<sdpi-item label="Find your ID">
-		<sdpi-link url="https://steamid.io/">steamid.io</sdpi-link>
-	</sdpi-item>
-
-	<!-- ── Game Browser settings ─────────────────────────────────── -->
-
-	<hr style="border-color: #3a3a3a; margin: 12px 0;" />
-
-	<!-- Game picker -->
-	<sdpi-item label="Pick a game" id="game-picker-section">
-		<div style="width:100%;">
-			<button id="load-games-btn">Load my games</button>
-			<input id="game-search" type="text" placeholder="Search…" style="display:none;" />
-			<div id="game-list-wrap" style="display:none;">
-				<div id="game-status">Press "Load my games" to fetch your library.</div>
-			</div>
-		</div>
-	</sdpi-item>
-
+	<!-- ── Pin a specific game ────────────────────────────────── -->
 	<sdpi-item label="Game App ID">
 		<sdpi-textfield
 			setting="appId"
@@ -113,49 +87,53 @@
 		></sdpi-textfield>
 	</sdpi-item>
 
-	<sdpi-item label="Auto-switch profile">
-		<sdpi-checkbox setting="autoSwitchProfile">
-			Switch to grid profile automatically (default: on)
-		</sdpi-checkbox>
-	</sdpi-item>
-
-	<sdpi-item label="Profile override">
-		<sdpi-textfield
-			setting="profileName"
-			placeholder="Leave empty for bundled auto-profile"
-		></sdpi-textfield>
-	</sdpi-item>
+	<!-- ── Pick from library to pin ──────────────────────────── -->
+	<div class="section">
+		<button id="load-games-btn" class="btn">Pick a game to pin…</button>
+		<input id="game-search" type="text" placeholder="Search…" style="display:none;" />
+		<div id="game-list-wrap" style="display:none;">
+			<div id="game-status">Press "Pick a game to pin" to fetch your library.</div>
+		</div>
+	</div>
 
 	<details>
 		<summary style="color: #969696; cursor: pointer; padding: 8px 0; font-size: 12px;">
 			How it works
 		</summary>
 		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
-			<p><strong>Press the key</strong> to load a game's achievements into the grid and automatically switch to the grid profile.</p>
-			<p><strong>Pick a game:</strong> Use "Load my games" to browse your Steam library and pick a game. The App ID field is set automatically when you click a game.</p>
-			<p><strong>Game App ID:</strong> Leave empty to detect the currently running game. Or set a specific App ID to always load that game. Find IDs on store.steampowered.com (the number in /app/<strong>440</strong>/).</p>
-			<p><strong>Auto profile:</strong> The plugin ships with bundled grid profiles for all Stream Deck models — Standard, Mini, XL, +, and Neo. The correct one is selected automatically based on your device. No setup needed.</p>
-			<p><strong>Profile override:</strong> If you want to use your own custom profile instead of the bundled one, enter its exact name here (as defined in your Stream Deck software).</p>
+			<p><strong>Browse library on grid:</strong> Switches the grid to games mode — browse all your games as tiles. Click a tile to load its achievements.</p>
+			<p><strong>Press the key:</strong> Loads the currently running game's achievements (or the pinned game if set). If no game is running, opens the games browser.</p>
+			<p><strong>Game App ID:</strong> Pin a specific game (the number in store.steampowered.com/app/<strong>440</strong>/). Leave empty for auto-detect.</p>
 		</div>
 	</details>
 
 	<script>
-		// ── State ─────────────────────────────────────────────
+		const browseBtn   = document.getElementById('browse-grid-btn');
+		const loadBtn     = document.getElementById('load-games-btn');
+		const searchInput = document.getElementById('game-search');
+		const listWrap    = document.getElementById('game-list-wrap');
+		const statusEl    = document.getElementById('game-status');
+
 		let allGames = [];
 		let selectedAppId = null;
 
-		const loadBtn    = document.getElementById('load-games-btn');
-		const searchInput = document.getElementById('game-search');
-		const listWrap   = document.getElementById('game-list-wrap');
-		const statusEl   = document.getElementById('game-status');
-
-		// ── Load current settings to mark selected game ───────
 		streamDeckClient.getSettings().then(({ payload }) => {
 			const appId = payload?.settings?.appId;
 			if (appId) selectedAppId = Number(appId);
 		}).catch(() => {});
 
-		// ── Load games button ─────────────────────────────────
+		// ── Browse on grid button ──────────────────────────────
+		browseBtn.addEventListener('click', () => {
+			browseBtn.disabled = true;
+			browseBtn.textContent = 'Browsing…';
+			streamDeckClient.sendToPlugin({ type: 'browseGames' });
+			setTimeout(() => {
+				browseBtn.disabled = false;
+				browseBtn.textContent = 'Browse library on grid';
+			}, 2000);
+		});
+
+		// ── Pick a game to pin button ──────────────────────────
 		loadBtn.addEventListener('click', () => {
 			loadBtn.disabled = true;
 			loadBtn.textContent = 'Loading…';
@@ -163,12 +141,11 @@
 			listWrap.style.display = 'block';
 			statusEl.style.display = 'block';
 			statusEl.textContent = 'Fetching your library…';
-			// Clear old list items
 			for (const el of listWrap.querySelectorAll('.game-item')) el.remove();
 			streamDeckClient.sendToPlugin({ type: 'requestGames' });
 		});
 
-		// ── Filter game list ──────────────────────────────────
+		// ── Filter game list ───────────────────────────────────
 		searchInput.addEventListener('input', () => {
 			const q = searchInput.value.toLowerCase();
 			for (const el of listWrap.querySelectorAll('.game-item')) {
@@ -176,14 +153,15 @@
 			}
 		});
 
-		// ── Receive messages from plugin ──────────────────────
+		// ── Receive messages from plugin ───────────────────────
 		streamDeckClient.onSendToPropertyInspector(({ payload }) => {
 			if (payload.type === 'games') {
 				allGames = payload.games.sort((a, b) => a.name.localeCompare(b.name));
 				renderGameList(allGames);
 				loadBtn.disabled = false;
-				loadBtn.textContent = `${allGames.length} games loaded`;
+				loadBtn.textContent = `${allGames.length} games — pick to pin`;
 			} else if (payload.type === 'gamesError') {
+				listWrap.style.display = 'block';
 				statusEl.textContent = payload.message ?? 'Error loading games.';
 				statusEl.style.display = 'block';
 				loadBtn.disabled = false;
@@ -192,7 +170,6 @@
 		});
 
 		function renderGameList(games) {
-			// Remove status + old items
 			statusEl.style.display = 'none';
 			for (const el of listWrap.querySelectorAll('.game-item')) el.remove();
 
@@ -215,24 +192,22 @@
 				listWrap.appendChild(div);
 			}
 
-			// Show search only when there are enough games
-			searchInput.style.display = games.length > 10 ? '' : 'none';
+			searchInput.style.display = games.length > 8 ? '' : 'none';
 			searchInput.value = '';
 		}
 
 		function selectGame(game) {
 			selectedAppId = game.appid;
-			// Highlight selection
 			for (const el of listWrap.querySelectorAll('.game-item')) {
 				el.classList.toggle('selected', el.dataset.appid === String(game.appid));
 			}
-			// Update the appId setting via streamDeckClient
 			streamDeckClient.getSettings().then(({ payload }) => {
 				const current = payload?.settings ?? {};
 				streamDeckClient.setSettings({ ...current, appId: game.appid });
 			}).catch(() => {
 				streamDeckClient.setSettings({ appId: game.appid });
 			});
+			streamDeckClient.sendToPlugin({ type: 'loadGame', appId: game.appid });
 		}
 	</script>
 </body>

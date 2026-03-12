@@ -1,6 +1,6 @@
 {
 	"Name": "Steam Achievement Hunter",
-	"Version": "0.2.0.0",
+	"Version": "0.3.0.0",
 	"Author": "Maxik",
 	"Description": "Track Steam achievements in real-time on your Stream Deck. Auto-detect running games, monitor unlock progress, and view global stats.",
 	"Category": "Steam Achievement Hunter",
@@ -129,11 +129,11 @@
 			]
 		},
 		{
-			"Name": "Grid: Achievement Cell",
+			"Name": "Grid: Cell",
 			"UUID": "com.maxik.steam-achievements.grid-cell",
 			"Icon": "imgs/actions/grid-cell/icon",
 			"Tooltip": "Displays a single achievement from the grid. Place multiple cells to create a gallery view.",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-cell.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -150,7 +150,7 @@
 			"UUID": "com.maxik.steam-achievements.grid-prev",
 			"Icon": "imgs/actions/grid-nav/icon",
 			"Tooltip": "Navigate to the previous page of achievements.",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-prev.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -167,7 +167,7 @@
 			"UUID": "com.maxik.steam-achievements.grid-next",
 			"Icon": "imgs/actions/grid-nav/icon",
 			"Tooltip": "Navigate to the next page of achievements.",
-			"PropertyInspectorPath": "ui/grid.html",
+			"PropertyInspectorPath": "ui/grid-next.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -180,28 +180,11 @@
 			]
 		},
 		{
-			"Name": "Grid: Back",
-			"UUID": "com.maxik.steam-achievements.grid-back",
-			"Icon": "imgs/actions/grid-nav/icon",
-			"Tooltip": "Return to the previous Stream Deck profile, or open a specific profile when a target is configured. Place on any profile to jump straight to the achievement grid.",
-			"PropertyInspectorPath": "ui/grid.html",
-			"Controllers": [
-				"Keypad"
-			],
-			"States": [
-				{
-					"Image": "imgs/actions/grid-nav/key",
-					"TitleAlignment": "bottom",
-					"FontSize": 10
-				}
-			]
-		},
-		{
-			"Name": "Grid: Info & Sort",
+			"Name": "Grid: Info & Config",
 			"UUID": "com.maxik.steam-achievements.grid-info",
 			"Icon": "imgs/actions/grid-info/icon",
-			"Tooltip": "Shows game progress ring. Press to cycle sort mode (default, rarest, alphabetical, locked only, unlocked only).",
-			"PropertyInspectorPath": "ui/grid.html",
+			"Tooltip": "Shows game progress ring. Press to switch display or cycle sort. Configure grid-wide settings here.",
+			"PropertyInspectorPath": "ui/grid-info.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -214,7 +197,7 @@
 			]
 		},
 		{
-			"Name": "Game Browser",
+			"Name": "Load Game",
 			"UUID": "com.maxik.steam-achievements.game-browser",
 			"Icon": "imgs/actions/game-browser/icon",
 			"Tooltip": "Select a game from your library to load into the achievement grid.",
@@ -244,6 +227,40 @@
 					"Image": "imgs/actions/daily-pick/key",
 					"TitleAlignment": "bottom",
 					"FontSize": 9
+				}
+			]
+		},
+		{
+			"Name": "Settings",
+			"UUID": "com.maxik.steam-achievements.settings",
+			"Icon": "imgs/actions/settings/icon",
+			"Tooltip": "Configure your Steam API key and Steam ID once. Press to test the connection.",
+			"PropertyInspectorPath": "ui/settings.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/settings/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10
+				}
+			]
+		},
+		{
+			"Name": "Profile Launcher",
+			"UUID": "com.maxik.steam-achievements.profile-launcher",
+			"Icon": "imgs/actions/profile-launcher/icon",
+			"Tooltip": "Jump to the achievement grid profile. Auto-detects your device type or use a custom profile name.",
+			"PropertyInspectorPath": "ui/profile-launcher.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/profile-launcher/key",
+					"TitleAlignment": "bottom",
+					"FontSize": 10
 				}
 			]
 		}

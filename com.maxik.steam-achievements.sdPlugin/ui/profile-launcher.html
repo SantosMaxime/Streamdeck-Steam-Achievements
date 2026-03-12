@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Profile Launcher - Settings</title>
+	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
+	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
+</head>
+<body>
+	<sdpi-item label="Mode">
+		<sdpi-select setting="mode" id="mode-select">
+			<option value="auto">Auto-detect device (Recommended)</option>
+			<option value="manual">Choose profile</option>
+		</sdpi-select>
+	</sdpi-item>
+
+	<div id="manual-section" style="display:none;">
+		<sdpi-item label="Profile Name">
+			<sdpi-textfield
+				setting="profileName"
+				id="profile-name-field"
+				placeholder="e.g. profiles/grid-standard"
+			></sdpi-textfield>
+		</sdpi-item>
+	</div>
+
+	<details>
+		<summary style="color: #969696; cursor: pointer; padding: 8px 0; font-size: 12px;">
+			How to use
+		</summary>
+		<div style="color: #969696; font-size: 11px; padding: 4px 12px; line-height: 1.5;">
+			<p><strong>Press the key</strong> to jump straight to the achievement grid profile.</p>
+			<p><strong>Auto-detect:</strong> Automatically picks the right bundled grid profile for your Stream Deck model — Standard, Mini, XL, +, or Neo. No configuration needed.</p>
+			<p><strong>Choose profile:</strong> Enter an exact profile name from your manifest.json (e.g. <code>profiles/grid-standard</code>) for custom configurations.</p>
+			<p>Place this button on your main profile to always have a one-press shortcut to the achievement grid.</p>
+		</div>
+	</details>
+
+	<script>
+		// Show/hide the manual profile name field based on mode selection
+		function updateVisibility(settings) {
+			const isManual = settings.mode === 'manual';
+			document.getElementById('manual-section').style.display = isManual ? '' : 'none';
+		}
+
+		// Load current settings on PI open
+		streamDeckClient.getSettings().then(({ payload }) => {
+			updateVisibility(payload?.settings ?? {});
+		}).catch(() => {});
+
+		// Update visibility when mode changes
+		streamDeckClient.onDidReceiveSettings(({ payload }) => {
+			updateVisibility(payload?.settings ?? {});
+		});
+	</script>
+</body>
+</html>

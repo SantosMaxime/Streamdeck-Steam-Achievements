@@ -1,21 +1,13 @@
 /**
  * Game Browser — select a game to load into the achievement grid.
  *
- * When pressed:
- *  1. Loads the selected (or currently running) game's achievements into the GridController.
- *  2. Sets the GridController's page size to match the device layout.
- *  3. Auto-switches to the bundled grid profile for the detected device type,
- *     unless a custom profile name is specified in settings.
+ * Press the key to load the currently running game's achievements, or
+ * configure a specific App ID in the Property Inspector.
  *
- * The PI can request the owned games list by sending { type: "requestGames" } via
- * sendToPlugin. The plugin responds with { type: "games", games: [...] } via
- * sendToPropertyInspector.
+ * In the PI, use "Load my games" to browse your library and click a game —
+ * achievements load into the grid immediately without a key press.
  *
- * Bundled profiles (registered in manifest.json):
- *   profiles/grid-standard  →  Stream Deck Standard (5×3, 10 cells)
- *   profiles/grid-mini      →  Stream Deck Mini (3×2, 3 cells)
- *   profiles/grid-xl        →  Stream Deck XL (8×4, 24 cells)
- *   profiles/grid-plus      →  Stream Deck + / Neo (4×2, 4 cells)
+ * Always auto-switches to the correct bundled grid profile for your device.
  */
 
 import streamDeck, {
@@ -30,31 +22,11 @@ import type { JsonValue } from "@elgato/utils";
 import { getGridController } from "../services/grid-controller";
 import { getSteamApi } from "../services/steam-client-holder";
 import { renderGameBrowserKey } from "../services/svg-renderer";
+import { DEVICE_PROFILE } from "../services/device-profiles";
 
 type GameBrowserSettings = {
-	/** Selected game appId (set from PI). Leave empty to auto-detect the running game. */
+	/** Selected game appId (set from PI game picker). Leave empty to auto-detect the running game. */
 	appId?: number;
-	/**
-	 * Custom profile name override. When set, switches to this profile instead of
-	 * the auto-detected bundled one. Must match the Name in manifest.json exactly.
-	 */
-	profileName?: string;
-	/** When false, disables automatic profile switching entirely. Default: true. */
-	autoSwitchProfile?: boolean;
-};
-
-// ── Device → bundled profile mapping ──────────────────────
-
-/**
- * Maps a Stream Deck device type to the bundled profile name and number of
- * grid cell slots visible on one page.
- */
-const DEVICE_PROFILE: Record<number, { profile: string; pageSize: number }> = {
-	0: { profile: "profiles/grid-standard", pageSize: 10 },  // Standard 5×3
-	1: { profile: "profiles/grid-mini",     pageSize: 3  },  // Mini 3×2
-	2: { profile: "profiles/grid-xl",       pageSize: 24 },  // XL 8×4
-	7: { profile: "profiles/grid-plus",     pageSize: 4  },  // Stream Deck +
-	9: { profile: "profiles/grid-plus",     pageSize: 4  },  // Neo 4×2
 };
 
 @action({ UUID: "com.maxik.steam-achievements.game-browser" })
@@ -87,135 +59,153 @@ export class GameBrowser extends SingletonAction<GameBrowserSettings> {
 		}
 	}
 
-	/** PI sent us a message — currently only "requestGames" is handled. */
 	override async onSendToPlugin(ev: SendToPluginEvent<JsonValue, GameBrowserSettings>): Promise<void> {
 		const msg = ev.payload as Record<string, unknown>;
 		const type = typeof msg === "object" && msg !== null ? String(msg["type"] ?? "") : "";
-		streamDeck.logger.info(`GameBrowser.onSendToPlugin: received type="${type}"`);
 
 		if (type === "requestGames") {
 			await this.sendGamesToPI();
+		} else if (type === "browseGames") {
+			await this.browseGamesOnGrid(ev.action.device);
+		} else if (type === "loadGame") {
+			const appId = typeof msg["appId"] === "number" ? (msg["appId"] as number) : null;
+			if (appId) {
+				await this.loadGameIntoGrid(appId, ev.action.device);
+			}
 		}
 	}
 
 	override async onKeyDown(ev: KeyDownEvent<GameBrowserSettings>): Promise<void> {
-		streamDeck.logger.info("GameBrowser.onKeyDown: key pressed");
-
-		// Step 1: Resolve the appId
 		let appId = this.selectedAppId;
-		streamDeck.logger.info(`GameBrowser.onKeyDown: selectedAppId=${appId ?? "null (will auto-detect)"}`);
 
 		if (!appId) {
 			const api = getSteamApi();
 			if (!api) {
-				streamDeck.logger.warn("GameBrowser.onKeyDown: no SteamApi (missing API key or Steam ID)");
 				await ev.action.showAlert();
 				return;
 			}
-			streamDeck.logger.info("GameBrowser.onKeyDown: detecting currently running game...");
-			const game = await api.getCurrentGame().catch((err: unknown) => {
-				streamDeck.logger.error(`GameBrowser.onKeyDown: getCurrentGame failed — ${String(err)}`);
-				return null;
-			});
+			const game = await api.getCurrentGame().catch(() => null);
 			if (!game) {
-				streamDeck.logger.warn("GameBrowser.onKeyDown: no game currently running");
-				await ev.action.showAlert();
-				await ev.action.setTitle("No game\nrunning");
+				// No game running — show the games browser on the grid instead.
+				await this.browseGamesOnGrid(ev.action.device);
 				return;
 			}
 			appId = game.appId;
-			streamDeck.logger.info(`GameBrowser.onKeyDown: detected running game appId=${appId}`);
 		}
 
-		// Step 2: Detect device type and set page size accordingly
-		const deviceType = ev.action.device.type as number;
-		const deviceInfo = DEVICE_PROFILE[deviceType];
-		const pageSize = deviceInfo?.pageSize ?? 10;
-		streamDeck.logger.info(`GameBrowser.onKeyDown: deviceType=${deviceType} mappedProfile="${deviceInfo?.profile ?? "none"}" pageSize=${pageSize}`);
-
-		const grid = getGridController();
-		grid.setPageSize(pageSize);
-
-		// Step 3: Load game into grid
-		try {
-			await ev.action.setTitle("Loading…");
-			streamDeck.logger.info(`GameBrowser.onKeyDown: calling grid.loadGame(${appId})...`);
-			await grid.loadGame(appId);
-			this.gameName = grid.getGameName();
-			streamDeck.logger.info(`GameBrowser.onKeyDown: grid loaded — game="${this.gameName}"`);
-
-			const { unlocked, total, pct } = grid.getStats();
-			const name = (this.gameName ?? "Game").length > 14
-				? (this.gameName ?? "Game").slice(0, 12) + "…"
-				: (this.gameName ?? "Game");
-			await ev.action.setTitle(`${name}\n${unlocked}/${total} ${pct}%`);
-		} catch (err) {
-			streamDeck.logger.error(`GameBrowser.onKeyDown: grid.loadGame failed — ${String(err)}`);
-			await ev.action.showAlert();
-			await ev.action.setTitle("Error");
-			return;
-		}
-
-		// Step 4: Auto-switch to grid profile
-		const settings = ev.payload.settings;
-		const autoSwitch = settings.autoSwitchProfile !== false; // default true
-		streamDeck.logger.info(`GameBrowser.onKeyDown: autoSwitch=${autoSwitch} profileOverride="${settings.profileName ?? "none"}"`);
-
-		if (autoSwitch) {
-			// Use custom override, or fall back to auto-detected bundled profile
-			const profileName = settings.profileName?.trim() || deviceInfo?.profile;
-			if (profileName) {
-				streamDeck.logger.info(`GameBrowser.onKeyDown: switching to profile "${profileName}" on device ${ev.action.device.id}`);
-				try {
-					await streamDeck.profiles.switchToProfile(ev.action.device.id, profileName);
-					streamDeck.logger.info(`GameBrowser.onKeyDown: switchToProfile OK`);
-				} catch (err) {
-					streamDeck.logger.error(`GameBrowser.onKeyDown: switchToProfile failed — ${String(err)}`);
-				}
-			} else {
-				streamDeck.logger.warn(`GameBrowser.onKeyDown: autoSwitch enabled but no profile found for deviceType=${deviceType}`);
-			}
-		}
+		await this.loadGameIntoGrid(appId, ev.action.device);
 	}
 
 	// ── Helpers ─────────────────────────────────────────────
 
+	/** Load a game into the grid and auto-switch to the correct bundled profile. */
+	private async loadGameIntoGrid(
+		appId: number,
+		device: { id: string; type: number },
+	): Promise<void> {
+		const deviceInfo = DEVICE_PROFILE[device.type as number];
+		const pageSize = deviceInfo?.pageSize ?? 10;
+
+		const grid = getGridController();
+		grid.setPageSize(pageSize);
+
+		for (const a of this.actions) {
+			await a.setTitle("Loading…");
+		}
+
+		try {
+			await grid.loadGame(appId);
+			this.gameName = grid.getGameName();
+			const { unlocked, total, pct } = grid.getStats();
+			const raw = this.gameName ?? "Game";
+			const name = raw.length > 14 ? raw.slice(0, 12) + "…" : raw;
+			for (const a of this.actions) {
+				await a.setTitle(`${name}\n${unlocked}/${total} ${pct}%`);
+			}
+		} catch (err) {
+			streamDeck.logger.error(`GameBrowser: loadGame failed — ${String(err)}`);
+			for (const a of this.actions) {
+				await a.showAlert();
+				await a.setTitle("Error");
+			}
+			return;
+		}
+
+		if (deviceInfo?.profile) {
+			try {
+				await streamDeck.profiles.switchToProfile(device.id, deviceInfo.profile);
+			} catch (err) {
+				streamDeck.logger.error(`GameBrowser: switchToProfile failed — ${String(err)}`);
+			}
+		}
+	}
+
+	/** Fetch owned games and put the grid into games-browse mode, then switch to the grid profile. */
+	private async browseGamesOnGrid(device: { id: string; type: number }): Promise<void> {
+		const api = getSteamApi();
+		if (!api) {
+			for (const a of this.actions) await a.showAlert();
+			return;
+		}
+
+		for (const a of this.actions) await a.setTitle("Loading…");
+
+		let games: { appid: number; name: string }[];
+		try {
+			games = await api.getOwnedGames();
+		} catch (err) {
+			streamDeck.logger.error(`GameBrowser: browseGames failed — ${String(err)}`);
+			for (const a of this.actions) {
+				await a.showAlert();
+				await a.setTitle("Load\ngame");
+			}
+			return;
+		}
+
+		const deviceInfo = DEVICE_PROFILE[device.type as number];
+		const pageSize = deviceInfo?.pageSize ?? 10;
+		const grid = getGridController();
+		grid.setPageSize(pageSize);
+		await grid.browseGames(games);
+
+		for (const a of this.actions) await a.setTitle("Games");
+
+		if (deviceInfo?.profile) {
+			try {
+				await streamDeck.profiles.switchToProfile(device.id, deviceInfo.profile);
+			} catch (err) {
+				streamDeck.logger.error(`GameBrowser: switchToProfile failed — ${String(err)}`);
+			}
+		}
+	}
+
 	private async resolveGameName(actionObj: { setTitle: (t: string) => Promise<void> }): Promise<void> {
 		if (!this.selectedAppId) return;
-
 		const api = getSteamApi();
 		if (!api) {
 			await actionObj.setTitle(`App\n${this.selectedAppId}`);
 			return;
 		}
-
 		const games = await api.getOwnedGames().catch(() => [] as { appid: number; name: string }[]);
 		const game = games.find((g) => g.appid === this.selectedAppId);
 		this.gameName = game?.name ?? `App ${this.selectedAppId}`;
-
 		const name = this.gameName.length > 14 ? this.gameName.slice(0, 12) + "…" : this.gameName;
 		await actionObj.setTitle(name);
 	}
 
-	/** Fetch owned games and send list to the PI via sendToPropertyInspector. */
 	private async sendGamesToPI(): Promise<void> {
 		const api = getSteamApi();
 		if (!api) {
-			streamDeck.logger.warn("GameBrowser.sendGamesToPI: no SteamApi available");
-			await streamDeck.ui.sendToPropertyInspector({ type: "gamesError", message: "Steam API not configured. Set your API key and Steam ID first." });
+			await streamDeck.ui.sendToPropertyInspector({ type: "gamesError", message: "Steam API not configured. Set your API key and Steam ID via the Settings action." });
 			return;
 		}
-
-		streamDeck.logger.info("GameBrowser.sendGamesToPI: fetching owned games...");
 		try {
 			const games = await api.getOwnedGames();
-			streamDeck.logger.info(`GameBrowser.sendGamesToPI: got ${games.length} games, sending to PI`);
 			await streamDeck.ui.sendToPropertyInspector({
 				type: "games",
 				games: games.map((g) => ({ appid: g.appid, name: g.name })),
 			});
 		} catch (err) {
-			streamDeck.logger.error(`GameBrowser.sendGamesToPI: getOwnedGames failed — ${String(err)}`);
 			await streamDeck.ui.sendToPropertyInspector({ type: "gamesError", message: `Failed to load games: ${String(err)}` });
 		}
 	}

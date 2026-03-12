@@ -1,8 +1,10 @@
 /**
  * Grid Info — displays a circular progress ring and game stats.
  *
- * Shows: game name + "23/50 (46%)" with an SVG progress ring.
- * Updates when global settings change (gridVersion).
+ * Configurable click behaviour (set in the Property Inspector):
+ *   mode-switch  → toggles between games browse and achievements display
+ *   sort         → cycles through sort modes (default → rarest → alpha → locked → unlocked)
+ *   nothing      → key press does nothing (info display only)
  */
 
 import streamDeck, {
@@ -13,13 +15,18 @@ import streamDeck, {
 	WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { getGridController, type SortMode } from "../services/grid-controller";
+import { getSteamApi } from "../services/steam-client-holder";
 import { renderProgressRing } from "../services/svg-renderer";
 
+type GridInfoSettings = {
+	clickBehavior?: "mode-switch" | "sort" | "nothing";
+};
+
 @action({ UUID: "com.maxik.steam-achievements.grid-info" })
-export class GridInfo extends SingletonAction {
+export class GridInfo extends SingletonAction<GridInfoSettings> {
 	private disposable?: { dispose: () => void };
 
-	override async onWillAppear(ev: WillAppearEvent): Promise<void> {
+	override async onWillAppear(ev: WillAppearEvent<GridInfoSettings>): Promise<void> {
 		await this.render(ev.action);
 
 		this.disposable?.dispose();
@@ -35,19 +42,44 @@ export class GridInfo extends SingletonAction {
 		this.disposable = undefined;
 	}
 
-	/** Press cycles through sort modes: default → rarest → alpha → locked-only → unlocked-only → default */
-	override async onKeyDown(_ev: KeyDownEvent): Promise<void> {
+	override async onKeyDown(ev: KeyDownEvent<GridInfoSettings>): Promise<void> {
+		const behavior = ev.payload.settings.clickBehavior ?? "mode-switch";
 		const grid = getGridController();
-		const modes: SortMode[] = ["default", "rarest", "alpha", "locked-only", "unlocked-only"];
-		const currentIdx = modes.indexOf(grid.getSortMode());
-		const nextMode = modes[(currentIdx + 1) % modes.length];
-		await grid.setSortMode(nextMode);
+
+		if (behavior === "mode-switch") {
+			if (grid.getMode() === "games") {
+				await grid.restoreAchievements();
+			} else {
+				const api = getSteamApi();
+				if (!api) { await ev.action.showAlert(); return; }
+				try {
+					const games = await api.getOwnedGames();
+					await grid.browseGames(games);
+				} catch {
+					await ev.action.showAlert();
+				}
+			}
+		} else if (behavior === "sort") {
+			const modes: SortMode[] = ["default", "rarest", "alpha", "locked-only", "unlocked-only"];
+			const currentIdx = modes.indexOf(grid.getSortMode());
+			await grid.setSortMode(modes[(currentIdx + 1) % modes.length]);
+		}
+		// "nothing" → no action
 	}
 
 	private async render(actionObj: { setImage: (img?: string) => Promise<void>; setTitle: (t: string) => Promise<void> }): Promise<void> {
 		const grid = getGridController();
-		const gameName = grid.getGameName();
 
+		if (grid.getMode() === "games") {
+			const count = grid.getGamesCount();
+			const page = grid.getPage() + 1;
+			const pageCount = grid.getPageCount();
+			await actionObj.setTitle(`${count} games\nPage ${page}/${pageCount}`);
+			await actionObj.setImage(renderProgressRing(0));
+			return;
+		}
+
+		const gameName = grid.getGameName();
 		if (!gameName) {
 			await actionObj.setTitle("No game\nloaded");
 			await actionObj.setImage(renderProgressRing(0));
@@ -55,8 +87,7 @@ export class GridInfo extends SingletonAction {
 		}
 
 		const { unlocked, total, pct } = grid.getStats();
-		const sortLabel = grid.getSortMode() === "default" ? "" : `\n[${grid.getSortMode()}]`;
-
+		const sortLabel = grid.getSortMode() !== "default" ? `\n[${grid.getSortMode()}]` : "";
 		const name = gameName.length > 16 ? gameName.slice(0, 14) + "…" : gameName;
 		await actionObj.setTitle(`${name}\n${unlocked}/${total} (${pct}%)${sortLabel}`);
 		await actionObj.setImage(renderProgressRing(pct));

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Grid Info &amp; Config</title>
+	<link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css" />
+	<script src="https://sdpi-components.dev/releases/v3/sdpi-components.js"></script>
+</head>
+<body>
+	<sdpi-item label="When pressed">
+		<sdpi-select setting="clickBehavior">
+			<option value="mode-switch">Switch display (games ↔ achievements)</option>
+			<option value="sort">Cycle sort order</option>
+			<option value="nothing">Nothing</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="">
+		<span style="color: #969696; font-size: 11px; line-height: 1.5;">
+			<strong>Switch display:</strong> toggles between browsing your game library and viewing achievements for a game.<br/>
+			<strong>Cycle sort:</strong> rotates through Default → Rarest first → Alphabetical → Locked only → Unlocked only.
+		</span>
+	</sdpi-item>
+
+	<hr style="border-color: #3a3a3a; margin: 12px 0;" />
+
+	<sdpi-item label="Game tile image">
+		<sdpi-select setting="gameTileImage" global>
+			<option value="logo">Logo (recommended)</option>
+			<option value="capsule_sm">Capsule 120×120 (reliable square)</option>
+			<option value="icon">Icon 256×256 (large icon)</option>
+			<option value="capsule_lg">Capsule 231×87 (wide)</option>
+			<option value="header">Header 460×215 (banner)</option>
+			<option value="library">Library 600×900 (portrait)</option>
+		</sdpi-select>
+	</sdpi-item>
+
+	<sdpi-item label="Cell click action">
+		<sdpi-select setting="clickAction" global>
+			<option value="youtube">Open YouTube guide</option>
+			<option value="steam">Open Steam guides</option>
+		</sdpi-select>
+	</sdpi-item>
+	<sdpi-item label="">
+		<span style="color: #969696; font-size: 11px;">
+			What happens when pressing a grid cell (achievements mode). Opens a search on YouTube or Steam guides.
+		</span>
+	</sdpi-item>
+</body>
+</html>

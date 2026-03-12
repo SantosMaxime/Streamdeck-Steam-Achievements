@@ -1,9 +1,11 @@
 /**
- * Grid Navigation — Prev / Next / Back actions.
+ * Grid Navigation — Prev / Next actions.
  *
  * Grid Prev: go to previous page
  * Grid Next: go to next page
- * Grid Back: return to previous Stream Deck profile
+ *
+ * Note: Grid navigation back is now handled by Elgato's built-in
+ * profile switching (available in the Action Library).
  */
 
 import streamDeck, {
@@ -86,42 +88,5 @@ export class GridNext extends SingletonAction {
 		const page = grid.getPage();
 		const total = grid.getPageCount();
 		await actionObj.setTitle(total > 1 ? `${page + 1}/${total} ▶` : "▶");
-	}
-}
-
-// ── Grid Back ──────────────────────────────────────────────
-
-type GridBackSettings = {
-	/**
-	 * When set, pressing this key switches TO the named profile.
-	 * When empty, it returns to the previous profile (default "Back" behaviour).
-	 *
-	 * Use this to place a "Open Grid" shortcut on any profile.
-	 * The value must match the profile name exactly as registered in manifest.json
-	 * (e.g. "profiles/grid-standard").
-	 */
-	targetProfile?: string;
-};
-
-@action({ UUID: "com.maxik.steam-achievements.grid-back" })
-export class GridBack extends SingletonAction<GridBackSettings> {
-	override async onWillAppear(ev: WillAppearEvent<GridBackSettings>): Promise<void> {
-		await ev.action.setImage(renderNavButton("back"));
-		await ev.action.setTitle(ev.payload.settings.targetProfile?.trim() ? "Grid" : "Back");
-	}
-
-	override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<GridBackSettings>): Promise<void> {
-		await ev.action.setTitle(ev.payload.settings.targetProfile?.trim() ? "Grid" : "Back");
-	}
-
-	override async onKeyDown(ev: KeyDownEvent<GridBackSettings>): Promise<void> {
-		const target = ev.payload.settings.targetProfile?.trim();
-		try {
-			const deviceId = ev.action.device.id;
-			// With a target: go TO that profile. Without: go BACK to the previous one.
-			await streamDeck.profiles.switchToProfile(deviceId, target || undefined);
-		} catch {
-			await ev.action.showAlert();
-		}
 	}
 }

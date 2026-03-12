@@ -1,8 +1,9 @@
 name: Release
 
-# Triggers when a release commit lands on main.
-# The bump script (npm run bump) always produces a commit starting with "release:".
-# Tags are created here by CI — never pushed manually from dev.
+# Triggers when any push lands on main.
+# A separate "check" job scans all commits in the push for a "release:" message.
+# The build/publish job only runs when one is found.
+# This correctly handles PR merges where HEAD is a "Merge pull request" commit.
 on:
   push:
     branches: [main]
@@ -14,12 +15,40 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  check:
+    name: Check for release commit
+    runs-on: ubuntu-latest
+    outputs:
+      is_release: ${{ steps.check.outputs.is_release }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan commits for release bump
+        id: check
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            FOUND=$(git log --format="%s" | grep "^release:" | head -1)
+          else
+            FOUND=$(git log "${BEFORE}..${{ github.sha }}" --format="%s" | grep "^release:" | head -1)
+          fi
+          if [ -n "$FOUND" ]; then
+            echo "is_release=true" >> "$GITHUB_OUTPUT"
+            echo "Found release commit: $FOUND"
+          else
+            echo "is_release=false" >> "$GITHUB_OUTPUT"
+            echo "No release commit in this push — skipping release."
+          fi
+
   release:
     name: Build & Publish Release
+    needs: check
+    if: needs.check.outputs.is_release == 'true'
     runs-on: ubuntu-latest
-
-    # Only run when the merge commit is a release bump
-    if: startsWith(github.event.head_commit.message, 'release:')
 
     steps:
       - name: Checkout

@@ -5,10 +5,12 @@ import { getGridController } from "./services/grid-controller";
 import { DashboardLevel, DashboardTotal, DashboardPerfect } from "./actions/dashboard";
 import { AchievementRadar } from "./actions/achievement-radar";
 import { GridCell } from "./actions/grid-cell";
-import { GridPrev, GridNext, GridBack } from "./actions/grid-nav";
+import { GridPrev, GridNext } from "./actions/grid-nav";
 import { GridInfo } from "./actions/grid-info";
 import { GameBrowser } from "./actions/game-browser";
 import { DailyPick } from "./actions/daily-pick";
+import { SettingsAction } from "./actions/settings";
+import { ProfileLauncher } from "./actions/profile-launcher";
 
 type GlobalSettings = {
 	apiKey?: string;
@@ -85,10 +87,11 @@ streamDeck.actions.registerAction(new AchievementRadar());
 streamDeck.actions.registerAction(new GridCell());
 streamDeck.actions.registerAction(new GridPrev());
 streamDeck.actions.registerAction(new GridNext());
-streamDeck.actions.registerAction(new GridBack());
 streamDeck.actions.registerAction(new GridInfo());
 streamDeck.actions.registerAction(new GameBrowser());
 streamDeck.actions.registerAction(new DailyPick());
+streamDeck.actions.registerAction(new SettingsAction());
+streamDeck.actions.registerAction(new ProfileLauncher());
 
 // ── Connect ──────────────────────────────────────────────
 
