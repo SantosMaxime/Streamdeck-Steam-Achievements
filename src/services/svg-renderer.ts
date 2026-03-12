@@ -238,8 +238,8 @@ export function renderProfileLauncherKey(label: string): string {
 
 /**
  * Game tile — shown when the grid is in "games" mode.
- * Shows the Steam library portrait image (600×900) scaled to fit without deformation:
- *   xMidYMid meet → full image visible, dark background fills letterbox gaps.
+ * Shows the Steam capsule thumbnail (120×120) when available:
+ *   xMidYMid meet → full image shown without distortion or deformation.
  * Falls back to splitting the game name across two lines with a teal border.
  */
 export function renderGameCell(name: string, imageDataUri: string | null = null): string {

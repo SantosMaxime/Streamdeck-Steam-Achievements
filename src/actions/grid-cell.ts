@@ -175,7 +175,7 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 				return;
 			}
 			const api = getSteamApi();
-			const imgUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900.jpg`;
+			const imgUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/capsule_sm_120.jpg`;
 			const imageDataUri = api ? await api.fetchImageAsDataUri(imgUrl) : null;
 			await actionObj.setImage(renderGameCell(game.name, imageDataUri));
 			await actionObj.setTitle("");
