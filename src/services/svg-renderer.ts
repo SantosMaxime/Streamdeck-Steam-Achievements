@@ -238,7 +238,7 @@ export function renderProfileLauncherKey(label: string): string {
 
 /**
  * Game tile — shown when the grid is in "games" mode.
- * Shows the Steam capsule thumbnail (120×120) when available:
+ * Displays Steam game logo or capsule image when available:
  *   xMidYMid meet → full image shown without distortion or deformation.
  * Falls back to splitting the game name across two lines with a teal border.
  */

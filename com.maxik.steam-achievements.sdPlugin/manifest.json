@@ -180,23 +180,6 @@
 			]
 		},
 		{
-			"Name": "Grid: Back",
-			"UUID": "com.maxik.steam-achievements.grid-back",
-			"Icon": "imgs/actions/grid-nav/icon",
-			"Tooltip": "Return to the previous Stream Deck profile, or open a specific profile when a target is configured. Place on any profile to jump straight to the achievement grid.",
-			"PropertyInspectorPath": "ui/grid-back.html",
-			"Controllers": [
-				"Keypad"
-			],
-			"States": [
-				{
-					"Image": "imgs/actions/grid-nav/key",
-					"TitleAlignment": "bottom",
-					"FontSize": 10
-				}
-			]
-		},
-		{
 			"Name": "Grid: Info",
 			"UUID": "com.maxik.steam-achievements.grid-info",
 			"Icon": "imgs/actions/grid-info/icon",

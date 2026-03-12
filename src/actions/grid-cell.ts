@@ -60,6 +60,8 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 	private lastVersion = -1;
 	/** Single subscription for all grid cells on this device. */
 	private globalSettingsDisposable?: { dispose: () => void };
+	/** User's preferred game tile image type (from global settings). */
+	private gameTileImage: string = "logo";
 
 	override async onWillAppear(ev: WillAppearEvent<GridCellSettings>): Promise<void> {
 		let slot = ev.payload.settings.slotIndex;
@@ -87,6 +89,7 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 			this.globalSettingsDisposable = streamDeck.settings.onDidReceiveGlobalSettings((gsEv) => {
 				const gs = gsEv.settings as Record<string, unknown>;
 				const version = gs.gridVersion as number | undefined;
+				this.gameTileImage = (gs.gameTileImage as string) || "logo";
 				if (version !== undefined && version !== this.lastVersion) {
 					this.lastVersion = version;
 					for (const a of this.actions) {
@@ -175,8 +178,17 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 				return;
 			}
 			const api = getSteamApi();
-			const imgUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/capsule_sm_120.jpg`;
-			const imageDataUri = api ? await api.fetchImageAsDataUri(imgUrl) : null;
+			let imageDataUri: string | null = null;
+
+			if (api) {
+				// Get URLs to try based on user's chosen image type
+				const urlsToTry = this.getImageUrlsForType(game.appid, this.gameTileImage);
+				for (const url of urlsToTry) {
+					imageDataUri = await api.fetchImageAsDataUri(url).catch(() => null);
+					if (imageDataUri) break; // Stop at first successful fetch
+				}
+			}
+
 			await actionObj.setImage(renderGameCell(game.name, imageDataUri));
 			await actionObj.setTitle("");
 			return;
@@ -250,6 +262,55 @@ export class GridCell extends SingletonAction<GridCellSettings> {
 		if (state.celebrationTimer) {
 			clearInterval(state.celebrationTimer);
 			state.celebrationTimer = undefined;
+		}
+	}
+
+	/** Get Steam CDN URLs to try for game images, ordered by preference. */
+	private getImageUrlsForType(appid: number, type: string): string[] {
+		const base = `https://cdn.akamai.steamstatic.com/steam/apps/${appid}`;
+
+		switch (type) {
+			case "logo":
+				return [
+					`${base}/logo.png`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/capsule_231x87.jpg`,
+				];
+			case "capsule_sm":
+				return [
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+					`${base}/capsule_231x87.jpg`,
+				];
+			case "icon":
+				return [
+					`${base}/icon_256x256.jpg`,
+					`${base}/icon_64x64.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+				];
+			case "capsule_lg":
+				return [
+					`${base}/capsule_231x87.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+				];
+			case "header":
+				return [
+					`${base}/header.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+				];
+			case "library":
+				return [
+					`${base}/library_600x900.jpg`,
+					`${base}/capsule_sm_120.jpg`,
+					`${base}/logo.png`,
+				];
+			default:
+				return [
+					`${base}/logo.png`,
+					`${base}/capsule_sm_120.jpg`,
+				];
 		}
 	}
 }
