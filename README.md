@@ -1,159 +1,83 @@
+<h1 align="center">Steam Achievement Hunter</h1>
+
 <p align="center">
-  <img src="https://img.shields.io/badge/Stream%20Deck-Plugin-blueviolet?style=for-the-badge" alt="Stream Deck Plugin"/>
-  <img src="https://img.shields.io/badge/Steam-Achievements-1b2838?style=for-the-badge&logo=steam" alt="Steam"/>
-  <img src="https://img.shields.io/badge/TypeScript-5.7-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript"/>
-  <img src="https://img.shields.io/github/v/release/SantosMaxime/Streamdeck-Steam-Achievements?style=for-the-badge" alt="Release"/>
-  <img src="https://img.shields.io/github/actions/workflow/status/SantosMaxime/Streamdeck-Steam-Achievements/ci.yml?branch=dev&style=for-the-badge&label=CI" alt="CI"/>
+  <b>Your Steam achievements, live on your Elgato Stream Deck.</b><br/>
+  Auto-detects the game you're playing, shows every achievement color-coded by rarity, and lights up the moment one unlocks.
 </p>
 
-# Steam Achievement Hunter
+<p align="center">
+  <a href="https://github.com/SantosMaxime/Streamdeck-Steam-Achievements/releases/latest"><img src="https://img.shields.io/github/v/release/SantosMaxime/Streamdeck-Steam-Achievements?style=flat-square&color=66c0f4" alt="Latest release"/></a>
+  <a href="https://github.com/SantosMaxime/Streamdeck-Steam-Achievements/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SantosMaxime/Streamdeck-Steam-Achievements/ci.yml?branch=dev&style=flat-square&label=CI" alt="CI"/></a>
+  <img src="https://img.shields.io/badge/Stream%20Deck-SDK%20v2-blueviolet?style=flat-square" alt="Stream Deck SDK v2"/>
+  <img src="https://img.shields.io/badge/TypeScript-5.7-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square" alt="MIT License"/></a>
+</p>
 
-Track Steam achievements in real-time on your Elgato Stream Deck. Auto-detect running games, monitor unlock progress, browse achievement galleries, and celebrate new unlocks — all without leaving your game.
+<p align="center">
+  <img src="docs/demo.gif" alt="Demo: the plugin detects the running game, fills the Stream Deck with the achievement grid, sorts it by rarity and celebrates an unlock" width="800"/>
+</p>
+
+<p align="center">
+  <a href="https://github.com/SantosMaxime/Streamdeck-Steam-Achievements/releases/latest"><b>Download</b></a> ·
+  <a href="#features">Features</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#development">Development</a>
+</p>
 
 ---
 
 ## Features
 
-| Action | Description |
-|--------|-------------|
-| **Achievement Radar** | Auto-detects running Steam games, shows the next locked achievement with icon and progress. Configurable poll interval (10-600s). Press to open a YouTube/Steam guide. |
-| **Achievement Grid** | Multi-key gallery spanning an entire Stream Deck page with pagination. Browse all achievements for any game at a glance. |
-| **Game Browser** | Pick a game from your library or auto-detect the running one, then loads it into the grid with auto profile switching. |
-| **Dashboard** | Three dedicated keys: Steam Level, Total Achievements, and Perfect Games count. |
-| **Daily Pick** | Suggests one random locked achievement each day using a deterministic hash. |
-| **Grid Info & Sort** | Progress ring display. Press to cycle sort modes: Default, Rarest First, Alphabetical, Locked Only, Unlocked Only. |
+- **Achievement Radar.** Detects the Steam game you're running and shows the next locked achievement with your progress. Press it to open a guide.
+- **Achievement Grid.** Turns the whole deck into a paged gallery of every achievement for a game. Locked ones are dimmed and every key carries a rarity stripe.
+- **One-press sorting.** The progress key cycles between Default, Rarest first, A–Z, Locked only and Unlocked only.
+- **Unlock celebration.** When an achievement pops, its key glows gold and the progress ring updates by itself.
+- **Game Browser.** Pick any game from your library, or let it use the one you're playing. It switches to the grid profile for you.
+- **Dashboard.** Three keys show your Steam level, total achievements and perfect games.
+- **Daily Pick.** Suggests one locked achievement to go after each day.
+- **Works on every Stream Deck size.** Grid profiles ship for Standard, Mini, XL, and + / Neo.
 
-### Rarity System
+### Rarity colors
 
-Achievements are color-coded by global unlock percentage:
+Each key is colored by the share of players who unlocked that achievement:
 
-| Rarity | Unlock % | Color |
-|--------|----------|-------|
+| Rarity | Unlocked by | Color |
+|--------|-------------|-------|
 | **Legendary** | < 1% | ![#f59e0b](https://placehold.co/12x12/f59e0b/f59e0b) Gold |
-| **Ultra Rare** | 1 – 5% | ![#a855f7](https://placehold.co/12x12/a855f7/a855f7) Purple |
-| **Rare** | 5 – 20% | ![#3b82f6](https://placehold.co/12x12/3b82f6/3b82f6) Blue |
-| **Uncommon** | 20 – 50% | ![#22c55e](https://placehold.co/12x12/22c55e/22c55e) Green |
+| **Ultra Rare** | 1–5% | ![#a855f7](https://placehold.co/12x12/a855f7/a855f7) Purple |
+| **Rare** | 5–20% | ![#3b82f6](https://placehold.co/12x12/3b82f6/3b82f6) Blue |
+| **Uncommon** | 20–50% | ![#22c55e](https://placehold.co/12x12/22c55e/22c55e) Green |
 | **Common** | > 50% | ![#6b7280](https://placehold.co/12x12/6b7280/6b7280) Gray |
 
-### Unlock Celebration
+---
 
-When an achievement is unlocked while the Radar is tracking it, a **10-second golden glow animation** plays on the key with the unlocked icon.
+## Getting started
+
+**You need:** Windows 10+, [Stream Deck software 6.6+](https://www.elgato.com/downloads), a free [Steam Web API key](https://steamcommunity.com/dev/apikey) and your [64-bit Steam ID](https://steamid.io/). Your Steam profile and game details must be public for the API to return achievements.
+
+1. Download the latest `.streamDeckPlugin` from [Releases](https://github.com/SantosMaxime/Streamdeck-Steam-Achievements/releases/latest).
+2. Double-click it to install it in Stream Deck.
+3. Drag the **Settings** action onto a key, then enter your API key and Steam ID. The key turns green once the connection works.
+4. Add the **Achievement Radar** and **Game Browser** actions, launch a game, and start hunting.
 
 ---
 
-## Architecture
+## Development
 
-```mermaid
-graph TD
-    subgraph StreamDeck["Stream Deck Hardware"]
-        Keys[Physical Keys]
-    end
-
-    subgraph Plugin["Plugin (Node.js 20)"]
-        Entry[plugin.ts<br/>Entry Point]
-
-        subgraph Actions
-            Radar[Achievement Radar]
-            Grid[Grid Cell / Nav / Info]
-            Browser[Game Browser]
-            Dash[Dashboard]
-            Daily[Daily Pick]
-        end
-
-        subgraph Services
-            API[SteamApiClient<br/>Caching + Rate Limiting]
-            GridCtrl[GridController<br/>Pagination + Sorting]
-            SVG[SVG Renderer<br/>Key Image Factory]
-            Holder[Client Holder<br/>Singleton]
-        end
-    end
-
-    subgraph External["External"]
-        SteamAPI[Steam Web API]
-    end
-
-    Keys <--> Entry
-    Entry --> Actions
-    Actions --> Services
-    API -->|HTTP + Cache| SteamAPI
-    Holder -->|Provides| API
-    Actions -->|setImage| SVG
-    Grid --> GridCtrl
-    Browser --> GridCtrl
+```bash
+git clone https://github.com/SantosMaxime/Streamdeck-Steam-Achievements.git
+cd Streamdeck-Steam-Achievements
+npm install
+streamdeck link com.maxik.steam-achievements.sdPlugin   # one-time, then restart Stream Deck
+npm run watch                                          # rebuild + restart the plugin on save
 ```
 
----
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, coding conventions and PR guidelines.
 
-## Project Structure
+<details>
+<summary><b>Full setup notes and scripts</b></summary>
 
-```
-Streamdeck-Steam-Achievements/
-├── src/
-│   ├── plugin.ts                      # Entry point — registers actions, starts game watcher
-│   ├── actions/
-│   │   ├── achievement-radar.ts       # Auto-detect game, show next locked achievement
-│   │   ├── daily-pick.ts             # Deterministic daily random achievement
-│   │   ├── dashboard.ts              # Level, Total Achievements, Perfect Games
-│   │   ├── game-browser.ts           # Game picker with auto-detect + profile switch
-│   │   ├── grid-cell.ts              # Individual achievement tile in the grid
-│   │   ├── grid-info.ts              # Progress ring + sort mode cycling
-│   │   └── grid-nav.ts              # Prev / Next / Back navigation
-│   ├── services/
-│   │   ├── steam-api.ts              # Steam Web API client with caching
-│   │   ├── steam-client-holder.ts    # Global singleton for SteamApiClient
-│   │   ├── grid-controller.ts        # Grid state: pagination, sorting, broadcasting
-│   │   └── svg-renderer.ts           # SVG image generators for all key displays
-│   ├── simulator/
-│   │   └── simulate.ts               # Terminal-based radar scenario simulator
-│   └── __tests__/
-│       ├── achievement-radar.test.ts  # Radar lifecycle, celebration, guide button
-│       ├── grid-controller.test.ts    # Pagination, sorting, stats, loadGame
-│       └── svg-renderer.test.ts       # Rarity info, all SVG render functions
-├── scripts/
-│   ├── generate-icons.ts             # Pure Node.js PNG rasterizer for all plugin icons
-│   ├── gen-profiles.mjs              # Generates .streamDeckProfile ZIP bundles
-│   └── bump-version.mjs             # Syncs version across package.json + manifest.json
-├── com.maxik.steam-achievements.sdPlugin/
-│   ├── manifest.json                 # Stream Deck SDK v2 plugin manifest
-│   ├── bin/                          # Build output (gitignored)
-│   ├── imgs/                         # Generated PNG icons (1x + @2x)
-│   ├── profiles/                     # Generated .streamDeckProfile bundles
-│   └── ui/                           # Property Inspector HTML files
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml                    # Lint + Test + Build on push/PR
-│   │   └── release.yml               # Auto-package + GitHub Release on tags
-│   ├── ISSUE_TEMPLATE/
-│   │   ├── bug_report.yml
-│   │   └── feature_request.yml
-│   └── pull_request_template.md
-├── package.json
-├── tsconfig.json
-├── rollup.config.mjs
-├── vitest.config.ts
-├── .editorconfig
-├── CONTRIBUTING.md
-└── CHANGELOG.md
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- [Node.js 20+](https://nodejs.org/)
-- [Elgato Stream Deck Software 6.6+](https://www.elgato.com/downloads)
-- [Steam Web API Key](https://steamcommunity.com/dev/apikey)
-- Your [Steam ID (64-bit)](https://steamid.io/)
-
-### Installation (from release)
-
-1. Download the latest `.streamDeckPlugin` file from [Releases](https://github.com/SantosMaxime/Streamdeck-Steam-Achievements/releases)
-2. Double-click the file to install it into Stream Deck
-3. Add any action to your Stream Deck and configure your API Key + Steam ID in the global settings
-
-### Development Setup
+#### Development Setup
 
 ```bash
 # Clone the repository
@@ -197,7 +121,7 @@ npm run simulate
   ```
 - Or if the plugin is already showing in Stream Deck, just run `npm run watch` directly — it will restart the already-registered plugin automatically.
 
-### Available Scripts
+#### Available Scripts
 
 | Script | Description |
 |--------|-------------|
@@ -211,7 +135,7 @@ npm run simulate
 | `npm run package` | Full release pipeline: icons + profiles + build + pack |
 | `npm run bump <patch\|minor\|major>` | Bump version in package.json + manifest.json, update CHANGELOG, commit |
 
-### Stream Deck CLI Commands
+#### Stream Deck CLI Commands
 
 | Command | Description |
 |---------|-------------|
@@ -222,9 +146,112 @@ npm run simulate
 | `streamdeck list` | List all installed plugins |
 | `streamdeck validate com.maxik.steam-achievements.sdPlugin` | Validate plugin structure and manifest |
 
----
+</details>
 
-## Versioning
+<details>
+<summary><b>Architecture</b></summary>
+
+```mermaid
+graph TD
+    subgraph StreamDeck["Stream Deck Hardware"]
+        Keys[Physical Keys]
+    end
+
+    subgraph Plugin["Plugin (Node.js 20)"]
+        Entry[plugin.ts<br/>Entry Point]
+
+        subgraph Actions
+            Radar[Achievement Radar]
+            Grid[Grid Cell / Nav / Info]
+            Browser[Game Browser]
+            Dash[Dashboard]
+            Daily[Daily Pick]
+        end
+
+        subgraph Services
+            API[SteamApiClient<br/>Caching + Rate Limiting]
+            GridCtrl[GridController<br/>Pagination + Sorting]
+            SVG[SVG Renderer<br/>Key Image Factory]
+            Holder[Client Holder<br/>Singleton]
+        end
+    end
+
+    subgraph External["External"]
+        SteamAPI[Steam Web API]
+    end
+
+    Keys <--> Entry
+    Entry --> Actions
+    Actions --> Services
+    API -->|HTTP + Cache| SteamAPI
+    Holder -->|Provides| API
+    Actions -->|setImage| SVG
+    Grid --> GridCtrl
+    Browser --> GridCtrl
+```
+
+</details>
+
+<details>
+<summary><b>Project structure</b></summary>
+
+```
+Streamdeck-Steam-Achievements/
+├── src/
+│   ├── plugin.ts                      # Entry point — registers actions, starts game watcher
+│   ├── actions/
+│   │   ├── achievement-radar.ts       # Auto-detect game, show next locked achievement
+│   │   ├── daily-pick.ts             # Deterministic daily random achievement
+│   │   ├── dashboard.ts              # Level, Total Achievements, Perfect Games
+│   │   ├── game-browser.ts           # Game picker with auto-detect + profile switch
+│   │   ├── grid-cell.ts              # Individual achievement tile in the grid
+│   │   ├── grid-info.ts              # Progress ring + sort mode cycling
+│   │   └── grid-nav.ts              # Prev / Next / Back navigation
+│   ├── services/
+│   │   ├── steam-api.ts              # Steam Web API client with caching
+│   │   ├── steam-client-holder.ts    # Global singleton for SteamApiClient
+│   │   ├── grid-controller.ts        # Grid state: pagination, sorting, broadcasting
+│   │   └── svg-renderer.ts           # SVG image generators for all key displays
+│   ├── simulator/
+│   │   └── simulate.ts               # Terminal-based radar scenario simulator
+│   └── __tests__/
+│       ├── achievement-radar.test.ts  # Radar lifecycle, celebration, guide button
+│       ├── grid-controller.test.ts    # Pagination, sorting, stats, loadGame
+│       └── svg-renderer.test.ts       # Rarity info, all SVG render functions
+├── scripts/
+│   ├── generate-icons.ts             # Pure Node.js PNG rasterizer for all plugin icons
+│   ├── gen-profiles.mjs              # Generates .streamDeckProfile ZIP bundles
+│   ├── bump-version.mjs             # Syncs version across package.json + manifest.json
+│   └── demo/render-demo.ts          # Renders docs/demo.gif from the real key renderer
+├── docs/
+│   └── demo.gif                      # README demo
+├── com.maxik.steam-achievements.sdPlugin/
+│   ├── manifest.json                 # Stream Deck SDK v2 plugin manifest
+│   ├── bin/                          # Build output (gitignored)
+│   ├── imgs/                         # Generated PNG icons (1x + @2x)
+│   ├── profiles/                     # Generated .streamDeckProfile bundles
+│   └── ui/                           # Property Inspector HTML files
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml                    # Lint + Test + Build on push/PR
+│   │   └── release.yml               # Auto-package + GitHub Release on tags
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml
+│   │   └── feature_request.yml
+│   └── pull_request_template.md
+├── package.json
+├── tsconfig.json
+├── rollup.config.mjs
+├── vitest.config.ts
+├── .editorconfig
+├── CONTRIBUTING.md
+└── CHANGELOG.md
+```
+
+</details>
+
+<details>
+<summary><b>Versioning and releases</b></summary>
 
 This project uses [Semantic Versioning](https://semver.org/). Versions are tracked in two files:
 
@@ -246,24 +273,15 @@ npm run bump major
 
 The script updates both files, appends a blank entry to `CHANGELOG.md`, and creates a `release:` commit on `dev`. Open a PR to `main` — CI will create the git tag and publish the GitHub Release automatically on merge.
 
----
-
-## CI/CD
-
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|
 | **CI** | Push/PR to `main` or `dev` | Type-check, test, build |
 | **Release** | Push tag `v*` | Test, build, pack `.streamDeckPlugin`, create GitHub Release with artifact |
 
----
+</details>
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow, coding conventions, and PR guidelines.
-
----
-
-## Tech Stack
+<details>
+<summary><b>Tech stack</b></summary>
 
 | Layer | Technology |
 |-------|------------|
@@ -276,8 +294,23 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow, coding conventi
 | Image Generation | Custom SVG renderer (runtime) + custom PNG rasterizer (build-time) |
 | CI/CD | GitHub Actions |
 
+</details>
+
+<details>
+<summary><b>Regenerating the demo GIF</b></summary>
+
+`docs/demo.gif` is rendered from the plugin's own SVG key renderer, using a fictional game and placeholder icons, so it needs no Steam account. It requires Playwright (Chromium) and ffmpeg:
+
+```bash
+npx tsx scripts/demo/render-demo.ts
+```
+
+</details>
+
 ---
 
 ## License
 
-This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+MIT. See [LICENSE](LICENSE).
+
+<sub>Not affiliated with Valve or Elgato. Steam and Stream Deck are trademarks of their respective owners.</sub>
